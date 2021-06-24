@@ -1,5 +1,9 @@
 package com.pollofritto.model;
 
+/**
+ * Class that represents a single tile in a kanboard
+ *
+ */
 public abstract class Tile {
 
     public enum TileType {Organizational, Informative}

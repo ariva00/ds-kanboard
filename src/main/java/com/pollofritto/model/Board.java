@@ -2,6 +2,10 @@ package com.pollofritto.model;
 
 import java.util.HashMap;
 
+/**
+ * Class that represents a single kanboard
+ *
+ */
 public class Board {
 
 	private HashMap<String, Column> columns = new HashMap<String, Column>();

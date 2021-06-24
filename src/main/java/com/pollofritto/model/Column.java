@@ -2,6 +2,10 @@ package com.pollofritto.model;
 
 import java.util.HashMap;
 
+/**
+ * Class that represents a single column in a kanboard
+ *
+ */
 public class Column {
 
     public enum ColumnState {active, archived}

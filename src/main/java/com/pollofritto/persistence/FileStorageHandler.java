@@ -14,6 +14,13 @@ public abstract class FileStorageHandler {
 	 * @return path of the file
 	 */
 	public abstract String storeFile(MultipartFile file);
+	
+	/**
+	 * Stores a file with a given name to the returned path
+	 * @param file
+	 * @param fileName
+	 * @return path of the file
+	 */
 	public abstract String storeFile(MultipartFile file, String fileName);
 	
 }
