@@ -1,0 +1,92 @@
+.kanboard.container{
+	position: relative;
+}
+
+.kanboard.container.row{
+	position:absolute;
+	width: 100%;
+	height: 100%;
+
+	display: flex;
+	flex-direction: row;
+	flex-wrap: initial;
+}
+
+@media (max-width : 600px) {
+	.kanboard.container.row{
+		display: block;
+		overflow: scroll;
+		flex-direction: unset;
+		flex-wrap: unset;
+	}
+}
+
+.kanboard.column{
+	min-width: 20%;
+}
+
+.kanboard.tile.container{
+	background-color: #ffffaa;
+	border-color: #ffaa00;
+	border-style: solid;
+	border-radius: 5px;
+	padding: 10px;
+}
+
+.kanboard.tile.title{
+	position: relative;
+	padding: 0;
+	margin: 5px;
+	left: 0px;
+	top: 0px;
+	font-size: 1rem;
+	font-weight: bold;
+	
+}
+
+.kanboard.tile.type{
+	position: relative;
+	float: right;
+	padding: 0;
+	margin: 5px;
+	right: 0px;
+	top: 0px;
+	font-size: 1rem;
+	color: #aaa;
+}
+
+.kanboard.tile.author{
+	position: relative;
+	float: right;
+	padding: 0;
+	margin: 5px;
+	right: 0px;
+	top: 0px;
+	font-size: 1rem;
+	font-style: italic;
+	color: #aaa;
+}
+
+.kanboard.button{
+	background-color: #210;
+	border: none;
+	border-radius: 5px;
+	color: white;
+	padding: 5px;
+	text-align: center;
+	text-decoration: none;
+	transition: 0.15s;
+}
+
+.kanboard.button:hover{
+	background-color: #fc0;
+	color: black;
+	
+}
+
+.kanboard.tile.image{
+	position: relative;
+	width: 100%;
+	height: 100%;
+	border-radius: 5px;
+}
