@@ -13,7 +13,7 @@ function kanboard(containerid, uri) {
 
 		containerRow.classList.add("kanboard", "container", "row");
 
-		for (col in data.columns) {
+		for (col of data.columns) {
 
 			var column = document.createElement("table");
 
@@ -21,13 +21,13 @@ function kanboard(containerid, uri) {
 
 			var header = document.createElement("th");
 			//TODO generate column element
-			header.append(col); 
+			header.append(col.title); 
 			column.appendChild(header); 
-			for (tile in data.columns[col].tiles) {
+			for (tile of col.tiles) {
 				var row = document.createElement("tr");
 				var content = document.createElement("td");
-				content.appendChild(createTileElement(data.columns[col].tiles[tile]));
-				console.log(data.columns[col].tiles[tile]);
+				content.appendChild(createTileElement(tile));
+				console.log(tile);
 
 				row.appendChild(content);
 				column.appendChild(row);
