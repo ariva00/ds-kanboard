@@ -4,7 +4,7 @@ import java.util.HashMap;
 
 public class Board {
 
-	HashMap<String, Column> columns = new HashMap<String, Column>();
+	private HashMap<String, Column> columns = new HashMap<String, Column>();
 
 	public void setColumns(HashMap<String, Column> columns) {
 		this.columns = columns;

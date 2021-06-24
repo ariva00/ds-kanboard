@@ -2,11 +2,25 @@ package com.pollofritto.model;
 
 public abstract class Tile {
 
-    int id;
+    public enum TileType {Organizational, Informative}
+
+    private long id;
+    private static long instanceCounter = 0L;
     private String title;
     private String author;
-    public enum TileType {Organizational, Informative}
     private TileType tileType;
+
+
+    public Tile(String title, String author, TileType tileType) {
+        this.id = instanceCounter++;
+        this.title = title;
+        this.author = author;
+        this.tileType = tileType;
+    }
+
+    public long getId() {
+        return id;
+    }
 
     public String getTitle() {
         return title;
