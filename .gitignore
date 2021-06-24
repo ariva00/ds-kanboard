@@ -7,8 +7,8 @@ target/
 ### MAVEN ###
 .mvn
 
-.mvnw
-.mvnw.cmd
+mvnw
+mvnw.cmd
 
 ### STS ###
 .apt_generated
