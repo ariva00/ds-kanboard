@@ -1,6 +1,7 @@
 package com.pollofritto.model;
 
-import java.util.HashMap;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Class that represents a single column in a kanboard
@@ -12,14 +13,14 @@ public class Column {
 
     private String title;
     private ColumnState state;
-    private HashMap<Integer, Tile> tiles = new HashMap<Integer, Tile>();
+    private List<Tile> tiles = new ArrayList<Tile>();
 
     public Column(String title, ColumnState state) {
         this.title = title;
         this.state = state;
     }
 
-    public Column(String title, ColumnState state, HashMap<Integer, Tile> tiles) {
+    public Column(String title, ColumnState state, List<Tile> tiles) {
         this(title, state);
         this.tiles = tiles;
     }
@@ -40,11 +41,11 @@ public class Column {
         this.state = state;
     }
 
-    public HashMap<Integer, Tile> getTiles() {
+    public List<Tile> getTiles() {
         return tiles;
     }
 
-    public void setTiles(HashMap<Integer, Tile> tiles) {
+    public void setTiles(List<Tile> tiles) {
         this.tiles = tiles;
     }
 

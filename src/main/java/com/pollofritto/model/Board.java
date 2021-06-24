@@ -1,6 +1,7 @@
 package com.pollofritto.model;
 
-import java.util.HashMap;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Class that represents a single kanboard
@@ -8,13 +9,13 @@ import java.util.HashMap;
  */
 public class Board {
 
-	private HashMap<String, Column> columns = new HashMap<String, Column>();
+	private  List<Column> columns = new ArrayList<Column>();
 
-	public void setColumns(HashMap<String, Column> columns) {
+	public void setColumns(List<Column> columns) {
 		this.columns = columns;
 	}
 
-	public HashMap<String, Column> getColumns() {
+	public List<Column> getColumns() {
 		return columns;
 	}
 

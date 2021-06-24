@@ -16,11 +16,11 @@ public class APIController {
 		Column demoColumn1 = new Column("colonna1", ColumnState.active);
 		Column demoColumn2 = new Column("colonna2", ColumnState.archived);
 
-		demoColumn1.getTiles().put(1, new TextTile("titolo1", "autore1", TileType.Informative, "demo1"));
-		demoColumn2.getTiles().put(2, new ImageTile("titolo2", "autore2", TileType.Organizational, "demo2"));
+		demoColumn1.getTiles().add(new TextTile("titolo1", "autore1", TileType.Informative, "demo1"));
+		demoColumn2.getTiles().add(new ImageTile("titolo2", "autore2", TileType.Organizational, "demo2"));
 
-		demoBoard.getColumns().put(demoColumn1.getTitle(), demoColumn1);
-		demoBoard.getColumns().put(demoColumn2.getTitle(), demoColumn2);
+		demoBoard.getColumns().add(demoColumn1);
+		demoBoard.getColumns().add(demoColumn2);
 
 		return demoBoard;
 	}
