@@ -1,8 +1,17 @@
 package com.pollofritto.dskanboard;
 
+import java.io.FileNotFoundException;
+import java.io.IOException;
+
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.multipart.MultipartFile;
 
 /**
@@ -17,9 +26,42 @@ public class WebController {
 	 * @param file
 	 * @return
 	 */
-	@PostMapping("/upload/")
-	public String uploadFile(@RequestParam("file") MultipartFile file) {
-		return DsKanboardApplication.getFileStorageHandler().storeFile(file);
+	@PostMapping("/files/")
+	@ResponseBody
+	public ResponseEntity<String> uploadFile(@RequestParam("file") MultipartFile file) {
+		try {
+			return new ResponseEntity<String>(DsKanboardApplication.getFileStorageHandler().storeFile(file), HttpStatus.CREATED);
+		} catch (IOException e) {
+			e.printStackTrace();
+			return new ResponseEntity<String>(HttpStatus.INTERNAL_SERVER_ERROR);
+		}
+	}
+	
+	@GetMapping("/files/{filename}")
+	@ResponseBody
+	public ResponseEntity<byte[]> getFile(@PathVariable("filename") String filename){
+		ResponseEntity<byte[]> response;
+		HttpHeaders header;
+		byte[] body;
+		
+		try {
+			body = DsKanboardApplication.getFileStorageHandler().getFile(filename);
+			
+			header = new HttpHeaders();
+			header.add("Content-Disposition", "attachment; filename=" + filename);
+			response = new ResponseEntity<byte[]>(body, header, HttpStatus.OK);
+			
+			
+		} catch (FileNotFoundException e) {
+			e.printStackTrace();
+			response = new ResponseEntity<byte[]>(HttpStatus.NOT_FOUND);
+		} catch (IOException e) {
+			e.printStackTrace();
+			response = new ResponseEntity<byte[]>(HttpStatus.INTERNAL_SERVER_ERROR);
+		}
+		
+		return response;
+		
 	}
 	
 }
