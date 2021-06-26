@@ -13,14 +13,23 @@ public abstract class Tile {
     private String title;
     private String author;
     private TileType tileType;
-
-
-    public Tile(String title, String author, TileType tileType) {
-        this.id = instanceCounter++;
+    
+    private Tile(String title, String author, TileType tileType, long id) {
+        this.id = id;
         this.title = title;
         this.author = author;
         this.tileType = tileType;
     }
+    
+    public Tile(String title, String author, TileType tileType) {
+    	this(title, author, tileType, instanceCounter++);
+    }
+    
+    public Tile(Tile tile) {
+    	this(tile.getTitle(), tile.getAuthor(), tile.getTileType(), tile.getId());
+    }
+    
+    public abstract Tile copy();
 
     public long getId() {
         return id;

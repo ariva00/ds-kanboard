@@ -14,7 +14,7 @@ public class Column {
     private String title;
     private ColumnState state;
     private List<Tile> tiles = new ArrayList<Tile>();
-
+    
     public Column(String title, ColumnState state) {
         this.title = title;
         this.state = state;
@@ -24,7 +24,17 @@ public class Column {
         this(title, state);
         this.tiles = tiles;
     }
-
+    
+    public Column(Column column) {
+    	this(column.getTitle(), column.getState());
+    	for(Tile tile : column.getTiles())
+    		this.tiles.add(tile.copy());
+    }
+    
+    public Column copy() {
+    	return new Column(this);
+    }
+    
     public String getTitle() {
         return title;
     }
@@ -48,5 +58,5 @@ public class Column {
     public void setTiles(List<Tile> tiles) {
         this.tiles = tiles;
     }
-
+    
 }

@@ -10,10 +10,28 @@ import java.util.Date;
  */
 public class Board {
 
-	long boardID;
-	long lastModified;
+	private long boardID;
+	private String title;
+	//TODO to be removed and placed in DataManager
+	private long lastModified;
 	private List<Column> columns = new ArrayList<Column>();
-
+	
+	public Board(long boardID, String title) {
+		this.boardID = boardID;
+		this.title = title;
+	}
+	
+	public Board(Board board) {
+		this(board.getBoardID(), board.getTitle());
+		for(Column column : board.getColumns()) {
+			this.columns.add(column.copy());
+		}
+	}
+	
+	public Board copy() {
+		return new Board(this);
+	}
+	
 	public List<Column> getColumns() {
 		return columns;
 	}
@@ -25,11 +43,16 @@ public class Board {
 	public long getBoardID() {
 		return boardID;
 	}
-
-	public void setBoardID(long boardID) {
-		this.boardID = boardID;
+	
+	public void setTitle(String title) {
+		this.title = title;
+	}
+	
+	public String getTitle() {
+		return title;
 	}
 
+	//TODO to be removed and placed in DataManager
 	public void updateLastModified() {
 		Date date = new Date();
 		long timestamp = date.getTime();
