@@ -1,5 +1,6 @@
 package com.pollofritto.dskanboard;
 
+import com.pollofritto.model.DataManager;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
@@ -10,6 +11,7 @@ import com.pollofritto.persistence.FileSystemFileStorageManager;
 public class DsKanboardApplication {
 
 	private static FileStorageManager fileStorageHandler;
+	private static DataManager dataManager;
 	
 	public static void main(String[] args) {
 		String fileSeparator = System.getProperty("file.separator");

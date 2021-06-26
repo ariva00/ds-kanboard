@@ -42,7 +42,7 @@ public class Column {
     }
 
     public List<Tile> getTiles() {
-        return tiles;
+        return  tiles;
     }
 
     public void setTiles(List<Tile> tiles) {
