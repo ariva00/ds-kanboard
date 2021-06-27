@@ -154,10 +154,4 @@ public class DataManager {
 		destinationTiles.add(sourceColumnTileIndex, selectedTile);
 	}
 
-	public long lastModified(long boardID) {
-		Board board = getBoard(boardID);
-		board.updateLastModified();
-		return board.getLastModified();
-	}
-
 }

@@ -6,48 +6,57 @@ package com.pollofritto.model;
  */
 public abstract class Tile {
 
-    public enum TileType {Organizational, Informative}
+	public enum TileType {Organizational, Informative}
 
-    private long id;
-    private static long instanceCounter = 0L;
-    private String title;
-    private String author;
-    private TileType tileType;
+	private long id;
+	private static long instanceCounter = 0L;
+	private String title;
+	private String author;
+	private TileType tileType;
 
+	private Tile(String title, String author, TileType tileType, long id) {
+		this.id = id;
+		this.title = title;
+		this.author = author;
+		this.tileType = tileType;
+	}
 
-    public Tile(String title, String author, TileType tileType) {
-        this.id = instanceCounter++;
-        this.title = title;
-        this.author = author;
-        this.tileType = tileType;
-    }
+	public Tile(String title, String author, TileType tileType) {
+		this(title, author, tileType, instanceCounter++);
+	}
 
-    public long getId() {
-        return id;
-    }
+	public Tile(Tile tile) {
+		this(tile.getTitle(), tile.getAuthor(), tile.getTileType(), tile.getId());
+	}
 
-    public String getTitle() {
-        return title;
-    }
+	public abstract Tile copy();
 
-    public void setTitle(String title) {
-        this.title = title;
-    }
+	public long getId() {
+		return id;
+	}
 
-    public String getAuthor() {
-        return author;
-    }
+	public String getTitle() {
+		return title;
+	}
 
-    public void setAuthor(String author) {
-        this.author = author;
-    }
+	public void setTitle(String title) {
+		this.title = title;
+	}
 
-    public TileType getTileType() {
-        return tileType;
-    }
+	public String getAuthor() {
+		return author;
+	}
 
-    public void setTileType(TileType tileType) {
-        this.tileType = tileType;
-    }
+	public void setAuthor(String author) {
+		this.author = author;
+	}
+
+	public TileType getTileType() {
+		return tileType;
+	}
+
+	public void setTileType(TileType tileType) {
+		this.tileType = tileType;
+	}
 
 }

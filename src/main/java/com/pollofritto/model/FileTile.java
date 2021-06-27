@@ -9,6 +9,16 @@ public class FileTile extends Tile {
 		this.fileURI = fileURI;
 	}
 	
+	public FileTile(FileTile tile) {
+		super(tile);
+		this.fileURI = tile.getFileURI();
+	}
+	
+	@Override
+	public Tile copy() {
+		return new FileTile(this);
+	}
+	
 	public String getFileURI() {
 		return fileURI;
 	}
