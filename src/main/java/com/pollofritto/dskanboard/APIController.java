@@ -81,8 +81,8 @@ public class APIController {
 	@PostMapping("/api/{boardID}/{columnTitle}/tiles/add/")
 	public ResponseEntity<String> addTile(@PathVariable String boardID,
 										   @PathVariable String columnTitle,
-										   @RequestParam (value = "tileTitle") String tileTitle,
-										   @RequestParam (value = "tileAuthor") String tileAuthor,
+										   @RequestParam (value = "title") String title,
+										   @RequestParam (value = "author") String author,
 										   @RequestParam (value = "tileType") String tileType,
 										   @RequestParam (value = "text", required = false) String text,
 										   @RequestParam (value = "image", required = false) String imageURI,
@@ -92,13 +92,13 @@ public class APIController {
 
 		switch (contentType) {
 			case "text":
-				newTile = new TextTile(tileTitle, tileAuthor, TileType.valueOf(tileType), text);
+				newTile = new TextTile(title, author, TileType.valueOf(tileType), text);
 				break;
 			case "image":
-				newTile = new ImageTile(tileTitle, tileAuthor, TileType.valueOf(tileType), imageURI);
+				newTile = new ImageTile(title, author, TileType.valueOf(tileType), imageURI);
 				break;
 			case "file":
-				newTile = new FileTile(tileTitle, tileAuthor, TileType.valueOf(tileType), fileURI);
+				newTile = new FileTile(title, author, TileType.valueOf(tileType), fileURI);
 				break;
 			default:
 				return new ResponseEntity<String>(HttpStatus.BAD_REQUEST);
@@ -112,9 +112,7 @@ public class APIController {
 	@GetMapping("/api/{boardID}/{columnTitle}/tiles/")
 	public List<Tile> getColumnTiles(@PathVariable String boardID,
 									 @PathVariable String columnTitle) {
-		List<Tile> tmp = DsKanboardApplication.getDataManager().getColumnTiles(Long.parseLong(boardID), columnTitle);
-		System.out.println(tmp);
-		return tmp;
+		return DsKanboardApplication.getDataManager().getColumnTiles(Long.parseLong(boardID), columnTitle);
 	}
 
 	@GetMapping("/api/{boardID}/{columnTitle}/{tileID}/")
@@ -160,29 +158,28 @@ public class APIController {
 	public ResponseEntity<String> moveTile(@PathVariable String boardID,
 										   @PathVariable String columnTitle,
 										   @PathVariable String tileID,
-										   @RequestParam String destinationColumnTitle) {
+										   @RequestParam (name = "destinationColumnTitle") String destinationColumnTitle) {
 		DsKanboardApplication.getDataManager().moveTile(Long.parseLong(boardID), columnTitle, destinationColumnTitle, Long.parseLong(tileID));
-		// TODO: Add moved tile URI
-		return new ResponseEntity<String>(HttpStatus.OK);
+		String movedTileURI = "/api/" + boardID + "/" + columnTitle + "/" + tileID + "/";
+		return new ResponseEntity<String>(movedTileURI, HttpStatus.OK);
 	}
 
+	// TODO: check "Cannot invoke "com.pollofritto.model.Column.getTiles()" because the return value of "com.pollofritto.model.DataManager.getColumn(long, String)" is null"
 	@PutMapping("/api/{boardID}/columns/swap/")
 	public ResponseEntity<String> swapColumns(@PathVariable String boardID,
-											  @RequestParam String column1,
-											  @RequestParam String column2) {
+											  @RequestParam (name = "column1") String column1,
+											  @RequestParam (name = "column2") String column2) {
 
 		DsKanboardApplication.getDataManager().swapColumns(Long.parseLong(boardID), column1, column2);
-		// TODO: add URI or something
 		return new ResponseEntity<String>(HttpStatus.OK);
 	}
 
 	@PutMapping("/api/{boardID}/{columnTitle}/swap/")
 	public ResponseEntity<String> swapTiles(@PathVariable String boardID,
 											@PathVariable String columnTitle,
-											@RequestParam String tileID1,
-											@RequestParam String tileID2) {
+											@RequestParam (name = "tileID1") String tileID1,
+											@RequestParam (name = "tileID2") String tileID2) {
 		DsKanboardApplication.getDataManager().swapTiles(Long.parseLong(boardID), columnTitle, Long.parseLong(tileID1), Long.parseLong(tileID2));
-		// TODO: add URI or something
 		return new ResponseEntity<String>(HttpStatus.OK);
 	}
 
