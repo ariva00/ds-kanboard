@@ -3,6 +3,8 @@ package com.pollofritto.model;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.pollofritto.model.Column.ColumnState;
+
 // TODO: Handling on board, column or tile not found
 public class DataManager {
 
@@ -94,7 +96,7 @@ public class DataManager {
 		List<Tile> tiles = getColumnTiles(boardID, columnTitle);
 		Column column = getColumn(boardID, columnTitle);
 
-		if (column.getState().equals("active"))
+		if (column.getState().equals(ColumnState.active))
 			tiles.add(tile);
 	}
 
@@ -132,7 +134,7 @@ public class DataManager {
 		List<Column> columns = getColumns(boardID);
 		Column selectedColumn = getColumn(boardID, columnTitle);
 
-		if (selectedColumn.getState().equals("active"))
+		if (selectedColumn.getState().equals(ColumnState.active))
 			columns.remove(selectedColumn);
 	}
 
@@ -143,8 +145,6 @@ public class DataManager {
 	}
 
 	public void moveTile(long boardID, String sourceColumnTitle, String destinationColumnTitle, long tileID) {
-		Column sourceColumn = getColumn(boardID, sourceColumnTitle);
-		Column destinationColumn = getColumn(boardID, destinationColumnTitle);
 		List<Tile> sourceTiles = getColumnTiles(boardID, sourceColumnTitle);
 		List<Tile> destinationTiles = getColumnTiles(boardID, destinationColumnTitle);
 		Tile selectedTile = getTile(boardID, sourceColumnTitle, tileID);

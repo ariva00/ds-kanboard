@@ -18,12 +18,17 @@ public class DsKanboardApplication {
 		String userHome = System.getProperty("user.home");
 		String directory = "ds-kanboard";
 		
+		dataManager = new DataManager();
 		fileStorageHandler = new FileSystemFileStorageManager(userHome + fileSeparator + directory + fileSeparator);
 		SpringApplication.run(DsKanboardApplication.class, args);
 	}
 
 	public static FileStorageManager getFileStorageHandler() {
 		return fileStorageHandler;
+	}
+	
+	public static DataManager getDataManager() {
+		return dataManager;
 	}
 	
 }

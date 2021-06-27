@@ -13,19 +13,17 @@ import java.util.List;
 @RestController
 public class APIController {
 
-	private DataManager dataManager = new DataManager();
-
 	@PostMapping("/api/boards/add/")
-	public ResponseEntity<String> addBoard(@RequestParam (value = "boardTitle", required = true) String boardTitle) {
+	public ResponseEntity<String> addBoard(@RequestParam (value = "boardTitle") String boardTitle) {
 		Board board = new Board(boardTitle);
-		dataManager.addBoard(board);
+		DsKanboardApplication.getDataManager().addBoard(board);
 		String boardURI = "/api/" + board.getBoardID() + '/';
 		return new ResponseEntity<String>(boardURI, HttpStatus.OK);
 	}
 
 	@GetMapping("/api/{boardID}/")
 	public Board getBoard(@PathVariable long boardID) {
-		return dataManager.getBoard(boardID);
+		return DsKanboardApplication.getDataManager().getBoard(boardID);
 	}
 
 	@PostMapping("/upload/image/")
@@ -35,15 +33,15 @@ public class APIController {
 
 	@GetMapping("/api/boards/")
 	public List<Board> getBoards() {
-		return dataManager.getBoards();
+		return DsKanboardApplication.getDataManager().getBoards();
 	}
 
 	@PostMapping("/api/{boardID}/columns/add/")
 	public ResponseEntity<String> addColumn(@PathVariable String boardID,
-											@RequestParam (name = "columnTitle", required = true) String columnTitle) {
+											@RequestParam (name = "columnTitle") String columnTitle) {
 
 		Column column = new Column(columnTitle);
-		dataManager.addColumn(Long.parseLong(boardID), column);
+		DsKanboardApplication.getDataManager().addColumn(Long.parseLong(boardID), column);
 		String columnURI = "/api/" + boardID + "/" + column.getTitle() + "/";
 
 		return new ResponseEntity<String>(columnURI, HttpStatus.OK);
@@ -51,13 +49,13 @@ public class APIController {
 
 	@GetMapping("/api/{boardID}/columns/")
 	public List<Column> getColumns(@PathVariable String boardID) {
-		return dataManager.getColumns(Long.parseLong(boardID));
+		return DsKanboardApplication.getDataManager().getColumns(Long.parseLong(boardID));
 	}
 
 	@GetMapping("/api/{boardID}/{columnTitle}/")
 	public Column getColumn(@PathVariable String boardID,
 							@PathVariable String columnTitle) {
-		return dataManager.getColumn(Long.parseLong(boardID), columnTitle);
+		return DsKanboardApplication.getDataManager().getColumn(Long.parseLong(boardID), columnTitle);
 	}
 
 
@@ -67,7 +65,7 @@ public class APIController {
 											 @RequestParam (value = "title", required = false) String newTitle,
 											 @RequestParam (value = "state", required = false) ColumnState columnState) {
 
-		Column selectedColumn = dataManager.getColumn(Long.parseLong(boardID), columnTitle);
+		Column selectedColumn = DsKanboardApplication.getDataManager().getColumn(Long.parseLong(boardID), columnTitle);
 
 		if (newTitle != null)
 			selectedColumn.setTitle(newTitle);
@@ -83,15 +81,13 @@ public class APIController {
 	@PostMapping("/api/{boardID}/{columnTitle}/tiles/add/")
 	public ResponseEntity<String> addTile(@PathVariable String boardID,
 										   @PathVariable String columnTitle,
-										   @RequestParam (value = "title", required = true) String tileTitle,
-										   @RequestParam (value = "author", required = true) String tileAuthor,
-										   @RequestParam (value = "tileType", required = true) String tileType,
+										   @RequestParam (value = "tileTitle") String tileTitle,
+										   @RequestParam (value = "tileAuthor") String tileAuthor,
+										   @RequestParam (value = "tileType") String tileType,
 										   @RequestParam (value = "text", required = false) String text,
 										   @RequestParam (value = "image", required = false) String imageURI,
 										   @RequestParam (value = "fileURI", required = false) String fileURI,
-										   @RequestParam (value = "contentType", required = true) String contentType) {
-
-		Column column = dataManager.getColumn(Long.parseLong(boardID), columnTitle);
+										   @RequestParam (value = "contentType") String contentType) {
 		Tile newTile;
 
 		switch (contentType) {
@@ -108,7 +104,7 @@ public class APIController {
 				return new ResponseEntity<String>(HttpStatus.BAD_REQUEST);
 		}
 
-		dataManager.addTile(Long.parseLong(boardID), columnTitle, newTile);
+		DsKanboardApplication.getDataManager().addTile(Long.parseLong(boardID), columnTitle, newTile);
 		String tileURI = "/api/" + boardID + "/" + columnTitle + "/" + newTile.getId() + '/';
 		return new ResponseEntity<String>(tileURI, HttpStatus.OK);
 	}
@@ -116,7 +112,7 @@ public class APIController {
 	@GetMapping("/api/{boardID}/{columnTitle}/tiles/")
 	public List<Tile> getColumnTiles(@PathVariable String boardID,
 									 @PathVariable String columnTitle) {
-		List<Tile> tmp = dataManager.getColumnTiles(Long.parseLong(boardID), columnTitle);
+		List<Tile> tmp = DsKanboardApplication.getDataManager().getColumnTiles(Long.parseLong(boardID), columnTitle);
 		System.out.println(tmp);
 		return tmp;
 	}
@@ -125,22 +121,20 @@ public class APIController {
 	public Tile getTile(@PathVariable String boardID,
 						@PathVariable String columnTitle,
 						@PathVariable String tileID) {
-		return dataManager.getTile(Long.parseLong(boardID), columnTitle, Long.parseLong(tileID));
+		return DsKanboardApplication.getDataManager().getTile(Long.parseLong(boardID), columnTitle, Long.parseLong(tileID));
 	}
 
 	@PutMapping("/api/{boardID}/{columnTitle}/{tileID}/edit/")
 	public ResponseEntity<String> editTile(@PathVariable String boardID,
 										   @PathVariable String columnTitle,
 										   @PathVariable String tileID,
-										   @RequestParam (value = "title", required = true) String tileTitle,
-										   @RequestParam (value = "author", required = true) String tileAuthor,
-										   @RequestParam (value = "tileType", required = true) String tileType,
+										   @RequestParam (value = "title") String tileTitle,
+										   @RequestParam (value = "author") String tileAuthor,
+										   @RequestParam (value = "tileType") String tileType,
 										   @RequestParam (value = "text", required = false) String text,
 										   @RequestParam (value = "image", required = false) String imageURI,
 										   @RequestParam (value = "fileURI", required = false) String fileURI,
-										   @RequestParam (value = "contentType", required = true) String contentType) {
-
-		Column column = dataManager.getColumn(Long.parseLong(boardID), columnTitle);
+										   @RequestParam (value = "contentType") String contentType) {
 		Tile editedTile;
 
 		switch (contentType) {
@@ -157,7 +151,7 @@ public class APIController {
 				return new ResponseEntity<String>(HttpStatus.BAD_REQUEST);
 		}
 
-		dataManager.editTile(Long.parseLong(boardID), columnTitle, Long.parseLong(tileID), editedTile);
+		DsKanboardApplication.getDataManager().editTile(Long.parseLong(boardID), columnTitle, Long.parseLong(tileID), editedTile);
 		String tileURI = "/api/" + boardID + "/" + columnTitle + "/" + editedTile.getId() + '/';
 		return new ResponseEntity<String>(tileURI, HttpStatus.OK);
 	}
@@ -167,9 +161,7 @@ public class APIController {
 										   @PathVariable String columnTitle,
 										   @PathVariable String tileID,
 										   @RequestParam String destinationColumnTitle) {
-
-		Column destinationColumn = dataManager.getColumn(Long.parseLong(boardID), destinationColumnTitle);
-		dataManager.moveTile(Long.parseLong(boardID), columnTitle, destinationColumnTitle, Long.parseLong(tileID));
+		DsKanboardApplication.getDataManager().moveTile(Long.parseLong(boardID), columnTitle, destinationColumnTitle, Long.parseLong(tileID));
 		// TODO: Add moved tile URI
 		return new ResponseEntity<String>(HttpStatus.OK);
 	}
@@ -179,7 +171,7 @@ public class APIController {
 											  @RequestParam String column1,
 											  @RequestParam String column2) {
 
-		dataManager.swapColumns(Long.parseLong(boardID), column1, column2);
+		DsKanboardApplication.getDataManager().swapColumns(Long.parseLong(boardID), column1, column2);
 		// TODO: add URI or something
 		return new ResponseEntity<String>(HttpStatus.OK);
 	}
@@ -189,7 +181,7 @@ public class APIController {
 											@PathVariable String columnTitle,
 											@RequestParam String tileID1,
 											@RequestParam String tileID2) {
-		dataManager.swapTiles(Long.parseLong(boardID), columnTitle, Long.parseLong(tileID1), Long.parseLong(tileID2));
+		DsKanboardApplication.getDataManager().swapTiles(Long.parseLong(boardID), columnTitle, Long.parseLong(tileID1), Long.parseLong(tileID2));
 		// TODO: add URI or something
 		return new ResponseEntity<String>(HttpStatus.OK);
 	}
