@@ -10,9 +10,23 @@ import java.util.Date;
  */
 public class Board {
 
-	long boardID;
+	private long boardID;
+	private String title;
+	private static long instanceCounter = 0L;
 	long lastModified;
 	private List<Column> columns = new ArrayList<Column>();
+
+
+	public Board(String title) {
+		this(instanceCounter++, title);
+	}
+
+	public Board(long boardID, String title) {
+		this.boardID = boardID;
+		this.title = title;
+		updateLastModified();
+	}
+
 
 	public List<Column> getColumns() {
 		return columns;
@@ -24,6 +38,10 @@ public class Board {
 
 	public long getBoardID() {
 		return boardID;
+	}
+
+	public String getBoardTitle() {
+		return title;
 	}
 
 	public void setBoardID(long boardID) {
@@ -39,6 +57,10 @@ public class Board {
 
 	public void setColumns(ArrayList<Column> columns) {
 		this.columns = columns;
+	}
+
+	public void setBoardTitle(String title) {
+		this.title = title;
 	}
 
 }

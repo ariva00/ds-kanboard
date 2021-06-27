@@ -15,8 +15,13 @@ public class Column {
     private ColumnState state;
     private List<Tile> tiles = new ArrayList<Tile>();
 
-    public Column(String title, ColumnState state) {
+    public Column(String title) {
         this.title = title;
+        this.state = ColumnState.valueOf("active");
+    }
+
+    public Column(String title, ColumnState state) {
+        this(title);
         this.state = state;
     }
 

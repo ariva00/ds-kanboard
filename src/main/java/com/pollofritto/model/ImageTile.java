@@ -1,19 +1,19 @@
 package com.pollofritto.model;
 
 public class ImageTile extends Tile {
-    private String image;
+    private String imageURI;
 
     public ImageTile(String title, String author, TileType tileType, String image) {
         super(title, author, tileType);
-        this.image = image;
+        this.imageURI = imageURI;
     }
 
-    public String getImage() {
-        return image;
+    public String getImageURI() {
+        return imageURI;
     }
 
-    public void setImage(String image) {
-        this.image = image;
+    public void setImageURI(String imageURI) {
+        this.imageURI = imageURI;
     }
 
 }
