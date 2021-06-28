@@ -2,8 +2,54 @@ class Kanboard {
 
 }
 
+class Board {
+	constructor(board, tileEditModal, columnEditModal, tileCreationModal, columnCreationModal, serverConnector, state) {
+		this.rootNode = document.createElement("div");
+		this.rootNode.classList.add("kanboard", "board");
+		for (index in board.columns) {
+			if(board.columns[index].state == state){
+
+				var prevTitle = undefined;
+				var succTitle = undefined;
+
+				if(board.columns[index - 1] != undefined)
+					prevTitle = board.columns[index - 1].title;
+			
+				if(board.columns[index + 1] != undefined)
+					succTitle = board.columns[index + 1].title;
+
+				var column = new ColumnElement(board.id, board.columns[index], tileEditModal, columnEditModal, tileCreationModal, serverConnector, prevTitle, succTitle);
+
+				this.rootNode.appendChild(column);
+			}
+		}
+
+		var columnCreationElement = new ColumnCreationElement (board.id, columnCreationModal);
+
+		this.rootNode.appendChild(columnCreationElement);
+	}
+}
+
+class ColumnCreationElement {
+	constructor(boardID, columnCreationModal) {
+		this.rootNode = document.createElement("div");
+		this.rootNode.classList.add("kanboard", "column");
+		
+		var tile = document.createElement("div");
+		tile.classList.add("kanboard", "tile");
+		this.rootNode.appendChild(tile);
+
+		var span = document.createElement("span");
+		span.classList.add("kanboard", "button", "text-button");
+		span.onclick = function(){
+			columnCreationModal.createColumn(boardID);
+		}
+		tile.appendChild(span);
+	}
+}
+
 class ColumnElement {
-	constructor(boardID, column, tileEditModal, columnEditModal, tileCreationModal, serverConnector, prevTitle, succTitle){
+	constructor(boardID, column, tileEditModal, columnEditModal, tileCreationModal, serverConnector, prevTitle, succTitle) {
 		this.rootNode = document.createElement("div");
 		this.rootNode.classList.add("kanboard", "column");
 		
