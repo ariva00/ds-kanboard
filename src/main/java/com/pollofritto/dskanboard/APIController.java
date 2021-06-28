@@ -174,7 +174,7 @@ public class APIController {
 		return new ResponseEntity<String>(HttpStatus.OK);
 	}
 
-	@PutMapping("/api/{boardID}/{columnTitle}/swap/")
+	@PutMapping("/api/{boardID}/{columnTitle}/tiles/swap/")
 	public ResponseEntity<String> swapTiles(@PathVariable String boardID,
 											@PathVariable String columnTitle,
 											@RequestParam (name = "tileID1") String tileID1,
@@ -183,5 +183,25 @@ public class APIController {
 		return new ResponseEntity<String>(HttpStatus.OK);
 	}
 
+	@DeleteMapping("/api/{boardID}/delete/")
+	public ResponseEntity<String> deleteBoard(@PathVariable String boardID) {
+		DsKanboardApplication.getDataManager().deleteBoard(Long.parseLong(boardID));
+		return new ResponseEntity<>(HttpStatus.OK);
+	}
+
+	@DeleteMapping("/api/{boardID}/{columnTitle}/delete/")
+	public ResponseEntity<String> deleteColumn(@PathVariable String boardID,
+											   @PathVariable String columnTitle) {
+		DsKanboardApplication.getDataManager().deleteColumn(Long.parseLong(boardID), columnTitle);
+		return new ResponseEntity<>(HttpStatus.OK);
+	}
+
+	@DeleteMapping("/api/{boardID}/{columnTitle}/{tileID}/delete/")
+	public ResponseEntity<String> deleteColumn(@PathVariable String boardID,
+											   @PathVariable String columnTitle,
+											   @PathVariable String tileID) {
+		DsKanboardApplication.getDataManager().deleteTile(Long.parseLong(boardID), columnTitle, Long.parseLong(tileID));
+		return new ResponseEntity<>(HttpStatus.OK);
+	}
 
 }
