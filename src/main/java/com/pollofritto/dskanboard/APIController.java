@@ -204,4 +204,16 @@ public class APIController {
 		return new ResponseEntity<>(HttpStatus.OK);
 	}
 
+
+	@GetMapping("/api/boards/headers/")
+	public List<Board> getBoardsHeaders() {
+		List<Board> boards = DsKanboardApplication.getDataManager().getBoardsClone();
+
+		for (Board b: boards) {
+			b.setColumns(null);
+		}
+
+		return boards;
+	}
+
 }
