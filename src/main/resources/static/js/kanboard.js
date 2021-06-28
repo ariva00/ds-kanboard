@@ -1,8 +1,84 @@
 class Kanboard {
 
+	constructor(){
+		this.state = "active";
+	}
+
+	setState(state){
+		this.state = state;
+	}
+
+	getState(){
+		return this.state;
+	}
+	
 }
 
-class Board {
+class NavbarElement {
+	constructor(boards, serverConnector, kanboard, boardCreationModal, loginModal){
+		this.rootNode = document.createElement("div");
+		this.rootNode.classList.add("kanboard", "navbar");
+		
+		var buttonsSpan = document.createElement("span");
+		buttonsSpan.style.display = "flex";
+
+		var select = document.createElement("select");
+		select.classList.add("kanboard", "input");
+
+		for(board of boards){
+			var option = document.createElement("option");
+			option.setAttribute("value", board.id);
+			option.append(board.title); 
+			select.appendChild(option);
+		}
+
+		select.onchange = function(){
+			serverConnector.getBoard(select.value);
+		}
+
+		buttonsSpan.appendChild(select);
+
+		var archiveButton = document.createElement("button");
+		archiveButton.classList("kanboard", "button", "text-button");
+		archiveButton.append("SHOW ARCHIVED");
+		archiveButton.onclick = function(){
+			if(kanboard.state = "archived")
+				kanboard.setState("active");
+			if(kanboard.state = "active")
+				kanboard.setState("archived");
+		}
+		buttonsSpan.appendChild(archiveButton);
+
+		var newBoardButton = document.createElement("button");
+		newBoardButton.classList("kanboard", "button", "text-button");
+		newBoardButton.append("ADD BOARD");
+		newBoardButton.onclick = function() {
+			boardCreationModal.createBoard();
+		}
+		buttonsSpan.appendChild(newBoardButton);
+
+		this.rootNode.appendChild(buttonsSpan);
+
+		var loginButton = document.createElement("span");
+		loginButton.classList.add("kanboard", "button", "text-button");
+
+		var span = document.createElement("span");
+		span.append("USERNAME");
+		loginButton.appendChild(span);
+		var icon = document.createElement("span");
+		icon.classList.add("material-icons-outlined");
+		icon.append("account_circle");
+		loginButton.appendChild(icon);
+
+		loginButton.onclick = function(){
+			loginModal.login();
+		}
+
+		this.rootNode.append(loginButton);
+	}
+}
+
+class BoardElement {
 	constructor(board, tileEditModal, columnEditModal, tileCreationModal, columnCreationModal, serverConnector, state) {
 		this.rootNode = document.createElement("div");
 		this.rootNode.classList.add("kanboard", "board");
@@ -20,13 +96,13 @@ class Board {
 
 				var column = new ColumnElement(board.id, board.columns[index], tileEditModal, columnEditModal, tileCreationModal, serverConnector, prevTitle, succTitle);
 
-				this.rootNode.appendChild(column);
+				this.rootNode.appendChild(column.getNodeTree());
 			}
 		}
 
 		var columnCreationElement = new ColumnCreationElement (board.id, columnCreationModal);
 
-		this.rootNode.appendChild(columnCreationElement);
+		this.rootNode.appendChild(columnCreationElement.getNodeTree());
 	}
 }
 
@@ -45,6 +121,10 @@ class ColumnCreationElement {
 			columnCreationModal.createColumn(boardID);
 		}
 		tile.appendChild(span);
+	}
+
+	getNodeTree(){
+		return this.rootNode;
 	}
 }
 
@@ -75,8 +155,11 @@ class ColumnElement {
 		}
 
 		var tileCreationElement = new TileCreationElement(boardID, column.title, tileCreationModal);
-		this.rootNode.appendChild(tileCreationElement);
+		this.rootNode.appendChild(tileCreationElement.getNodeTree());
+	}
 
+	getNodeTree(){
+		return this.rootNode;
 	}
 }
 
@@ -148,6 +231,10 @@ class ColumnHeaderElement {
 
 		this.rootNode.appendChild(columnRightLeftSpan);
 	}
+
+	getNodeTree(){
+		return this.rootNode;
+	}
 }
 
 class TileCreationElement {
@@ -163,7 +250,9 @@ class TileCreationElement {
 		this.rootNode.appendChild(createTileButton);
 	}
 	
-	getNodeTree();
+	getNodeTree(){
+		return this.rootNode;
+	}
 }
 
 class TileElement {
@@ -328,7 +417,7 @@ class ColumnCreationModal extends Modal{
 
 class BoardCreationModal extends Modal{
 	
-	createColumn(){
+	createBoard(){
 		console.log("/api/" + boardID + "/columns/add/")
 	}
 
@@ -346,6 +435,14 @@ class ColumnEditModal extends Modal{
 
 	edit(boardID, column){
 		console.log("/api/" + boardID + "/" + column.title + "/edit/");
+	}
+
+}
+
+class LoginModal extends Modal{
+
+	login(){
+		console.log("login");
 	}
 
 }
