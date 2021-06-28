@@ -60,6 +60,7 @@
 
 .kanboard.container{
 	position : relative;
+	background-color: var(--board-background);
 }
 
 .kanboard.navbar{

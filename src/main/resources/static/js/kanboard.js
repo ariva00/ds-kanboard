@@ -1,11 +1,70 @@
 class Kanboard {
 
-	constructor(){
+	constructor(containerID, uri){
+
+		this.uri = uri;
+
+		this.boards = undefined;
+
+		this.board = undefined;
+
 		this.state = "active";
+
+		this.rootNode = document.getElementById(containerID);
+
+		this.rootNode.classList.add("kanboard", "container");
+
+		this.loginModal = new LoginModal(this);
+		this.rootNode.appendChild(this.loginModal.getNodeTree());
+
+		this.loginModal.login();
+	}
+
+	init(username){
+		this.serverConnector = new ServerConnector(this.uri, this);
+
+		this.username = username;
+
+		this.tileCreationModal = new TileCreationModal(this.serverConnector, this.username);
+		this.rootNode.appendChild(this.tileCreationModal.getNodeTree());
+		this.tileEditModal = new TileEditModal(this.serverConnector, this.username);
+		this.rootNode.appendChild(this.tileEditModal.getNodeTree());
+		this.columnCreationModal = new ColumnCreationModal(this.serverConnector, this.username);
+		this.rootNode.appendChild(this.columnCreationModal.getNodeTree());
+		this.columnEditModal = new ColumnEditModal(this.serverConnector, this.username);
+		this.rootNode.appendChild(this.columnEditModal.getNodeTree());
+		this.boardCreationModal = new BoardCreationModal(this.serverConnector, this.username);
+		this.rootNode.appendChild(this.boardCreationModal.getNodeTree());
+
+		this.updateBoards();
+
+		
+	}
+
+	updateBoard(){
+		if(this.boardElement != undefined){
+			this.rootNode.removeChild(this.boardElement.getNodeTree());
+		}
+		this.boardElement = new BoardElement(this.board, this.tileEditModal, this.columnEditModal, this.tileCreationModal, this.columnCreationModal, this.serverConnector, this.state);
+		this.rootNode.append(this.boardElement.getNodeTree());
+	}
+
+	updateBoards(){
+		this.serverConnector.getBoards();
+	}
+
+	updateNavbar(){
+		if(this.navbarElement != undefined){
+			this.rootNode.removeChild(this.navbarElement.getNodeTree())
+		}
+		this.navbarElement = new NavbarElement(this.boards, this.serverConnector, this, this.boardCreationModal, this.loginModal);
+		this.rootNode.appendChild(this.navbarElement.getNodeTree());
 	}
 
 	setState(state){
 		this.state = state;
+		console.log(state);
+		this.updateBoard();
 	}
 
 	getState(){
@@ -15,6 +74,7 @@ class Kanboard {
 }
 
 class NavbarElement {
+
 	constructor(boards, serverConnector, kanboard, boardCreationModal, loginModal){
 		this.rootNode = document.createElement("div");
 		this.rootNode.classList.add("kanboard", "navbar");
@@ -25,9 +85,10 @@ class NavbarElement {
 		var select = document.createElement("select");
 		select.classList.add("kanboard", "input");
 
-		for(board of boards){
+		for(var board of boards){
+			console.log(board);
 			var option = document.createElement("option");
-			option.setAttribute("value", board.id);
+			option.setAttribute("value", board.boardID);
 			option.append(board.title); 
 			select.appendChild(option);
 		}
@@ -39,18 +100,26 @@ class NavbarElement {
 		buttonsSpan.appendChild(select);
 
 		var archiveButton = document.createElement("button");
-		archiveButton.classList("kanboard", "button", "text-button");
+		archiveButton.classList.add("kanboard", "button", "text-button");
 		archiveButton.append("SHOW ARCHIVED");
 		archiveButton.onclick = function(){
-			if(kanboard.state = "archived")
+			if(kanboard.getState() == "archived"){
 				kanboard.setState("active");
-			if(kanboard.state = "active")
+				archiveButton.removeChild(archiveButton.firstChild);
+				archiveButton.append("SHOW ARCHIVED");
+			}
+				
+			else if(kanboard.getState() == "active"){
 				kanboard.setState("archived");
+				archiveButton.removeChild(archiveButton.firstChild);
+				archiveButton.append("SHOW ACTIVE");
+			}
+				
 		}
 		buttonsSpan.appendChild(archiveButton);
 
 		var newBoardButton = document.createElement("button");
-		newBoardButton.classList("kanboard", "button", "text-button");
+		newBoardButton.classList.add("kanboard", "button", "text-button");
 		newBoardButton.append("ADD BOARD");
 		newBoardButton.onclick = function() {
 			boardCreationModal.createBoard();
@@ -63,7 +132,7 @@ class NavbarElement {
 		loginButton.classList.add("kanboard", "button", "text-button");
 
 		var span = document.createElement("span");
-		span.append("USERNAME");
+		span.append(kanboard.username);
 		loginButton.appendChild(span);
 		var icon = document.createElement("span");
 		icon.classList.add("material-icons-outlined");
@@ -75,14 +144,21 @@ class NavbarElement {
 		}
 
 		this.rootNode.append(loginButton);
+
+		serverConnector.getBoard(select.value);
+	}
+
+	getNodeTree(){
+		return this.rootNode;
 	}
 }
 
 class BoardElement {
+
 	constructor(board, tileEditModal, columnEditModal, tileCreationModal, columnCreationModal, serverConnector, state) {
 		this.rootNode = document.createElement("div");
 		this.rootNode.classList.add("kanboard", "board");
-		for (index in board.columns) {
+		for (var index in board.columns) {
 			if(board.columns[index].state == state){
 
 				var prevTitle = undefined;
@@ -94,50 +170,59 @@ class BoardElement {
 				if(board.columns[index + 1] != undefined)
 					succTitle = board.columns[index + 1].title;
 
-				var column = new ColumnElement(board.id, board.columns[index], tileEditModal, columnEditModal, tileCreationModal, serverConnector, prevTitle, succTitle);
+				var column = new ColumnElement(board.boardID, board.columns[index], tileEditModal, columnEditModal, tileCreationModal, serverConnector, prevTitle, succTitle);
 
 				this.rootNode.appendChild(column.getNodeTree());
 			}
 		}
 
-		var columnCreationElement = new ColumnCreationElement (board.id, columnCreationModal);
+		var columnCreationElement = new ColumnCreationElement (board.boardID, columnCreationModal);
 
 		this.rootNode.appendChild(columnCreationElement.getNodeTree());
 	}
+
+	getNodeTree(){
+		return this.rootNode;
+	}
+
 }
 
 class ColumnCreationElement {
+
 	constructor(boardID, columnCreationModal) {
 		this.rootNode = document.createElement("div");
 		this.rootNode.classList.add("kanboard", "column");
 		
 		var tile = document.createElement("div");
 		tile.classList.add("kanboard", "tile");
-		this.rootNode.appendChild(tile);
 
 		var span = document.createElement("span");
 		span.classList.add("kanboard", "button", "text-button");
 		span.onclick = function(){
 			columnCreationModal.createColumn(boardID);
 		}
+		span.append("ADD COLUMN");
 		tile.appendChild(span);
+
+		this.rootNode.appendChild(tile);
 	}
 
 	getNodeTree(){
 		return this.rootNode;
 	}
+
 }
 
 class ColumnElement {
+
 	constructor(boardID, column, tileEditModal, columnEditModal, tileCreationModal, serverConnector, prevTitle, succTitle) {
 		this.rootNode = document.createElement("div");
 		this.rootNode.classList.add("kanboard", "column");
 		
-		this.tiles = new Array();
 
 		var columnHeaderElement = new ColumnHeaderElement(boardID, column, columnEditModal, serverConnector, prevTitle, succTitle);
 
-		this.rootNode.appendChild(columnHeaderElement);
+		this.rootNode.appendChild(columnHeaderElement.getNodeTree());
 
 		for(var index in column.tiles){
 			var prevTileID = undefined;
@@ -149,8 +234,7 @@ class ColumnElement {
 			if(column.tiles[index + 1] != undefined)
 				succTileID = column.tiles[index + 1].id;
 
-			var tile = new TileElement(boardID, column.title, column.tiles[index], tileEditModal, serverConnector, prevTileID, succTileID)
-			this.tiles.add(tile);
+			var tile = new TileElement(boardID, column.title, column.tiles[index], tileEditModal, serverConnector, prevTileID, succTileID);
 			this.rootNode.appendChild(tile.getNodeTree());
 		}
 
@@ -161,9 +245,11 @@ class ColumnElement {
 	getNodeTree(){
 		return this.rootNode;
 	}
+
 }
 
 class ColumnHeaderElement {
+
 	constructor(boardID, column, columnEditModal, serverConnector, prevTitle, succTitle) {
 		this.rootNode = document.createElement("div");
 		this.rootNode.classList.add("kanboard", "tile");
@@ -179,6 +265,7 @@ class ColumnHeaderElement {
 		var tileTitle = document.createElement("p");
 		tileTitle.classList.add("kanboard", "column-title");
 		tileTitle.append(column.title);
+		tileHeader.appendChild(tileTitle);
 
 		var buttonsSpan = document.createElement("span");
 		var archiveButton = document.createElement("span");
@@ -206,6 +293,8 @@ class ColumnHeaderElement {
 		buttonsSpan.appendChild(deleteButton);
 
 		tileHeader.appendChild(buttonsSpan);
+
+		this.rootNode.appendChild(tileHeader);
 
 		var columnRightLeftSpan = document.createElement("span");
 
@@ -235,6 +324,7 @@ class ColumnHeaderElement {
 	getNodeTree(){
 		return this.rootNode;
 	}
+
 }
 
 class TileCreationElement {
@@ -369,13 +459,15 @@ class TileElement {
 	}
 
 	getNodeTree(){
-		return this.rootNode();
+		return this.rootNode;
 	}
 }
 
 class Modal {
-	constructor(serverConnector){
+	constructor(serverConnector, author){
 		this.serverConnector = serverConnector;
+		this.author = author;
+
 		this.rootNode = document.createElement("div");
 		this.rootNode.classList.add("kanboard", "modal-container");
 		this.hide();
@@ -441,25 +533,65 @@ class ColumnEditModal extends Modal{
 
 class LoginModal extends Modal{
 
+	constructor(kanboard){
+		super(null, null);
+		var form = document.createElement("form");
+		form.classList.add("kanboard", "form");
+		
+		var usernameInput = document.createElement("input");
+		usernameInput.classList.add("kanboard", "input");
+		usernameInput.setAttribute("type", "text");
+		usernameInput.setAttribute("placeholder", "username");
+		usernameInput.setAttribute("name", "username");
+
+		form.appendChild(usernameInput);
+		this.modalDiv.appendChild(form);
+
+		var button = document.createElement("button");
+		button.disabled = true;
+		button.classList.add("kanboard", "button", "text-button");
+		button.append("LOGIN");
+		this.modalDiv.appendChild(button);
+
+
+		usernameInput.onchange = function(){
+			if(usernameInput.value == "" || usernameInput.value == undefined){
+				button.disabled = true;
+			}
+			else{
+				button.disabled = false;
+			}
+		}
+
+		var loginContext = this;
+		button.onclick = function(){
+			kanboard.init(usernameInput.value);
+			loginContext.hide();
+		}
+	}
+
 	login(){
 		console.log("login");
+		this.show();
 	}
 
 }
 
 class ServerConnector {
 
-	constructor(uri, callbackFunction) {
+	constructor(uri, kanboard) {
 		this.uri = uri;
-		this.callback = callbackFunction;
+		this.kanboard = kanboard;
 	}
 
 	getBoard(boardID) {
 		var xhr = new XMLHttpRequest();
 
+		var connectorContext = this;
 		xhr.addEventListener("readystatechange", function () {
 			if (this.readyState === 4) {
-				this.callback(this);
+				connectorContext.kanboard.board = JSON.parse(this.response);
+				connectorContext.kanboard.updateBoard();
 			}
 		});
 
@@ -471,13 +603,15 @@ class ServerConnector {
 	getBoards() {
 		var xhr = new XMLHttpRequest();
 
+		var connectorContext = this;
 		xhr.addEventListener("readystatechange", function () {
 			if (this.readyState === 4) {
-				this.callback(this);
+				connectorContext.kanboard.boards = JSON.parse(this.response);
+				connectorContext.kanboard.updateNavbar();
 			}
 		});
 
-		xhr.open("GET", this.uri + "/api/baords/");
+		xhr.open("GET", this.uri + "/api/boards/");
 
 		xhr.send();
 	}
@@ -485,9 +619,10 @@ class ServerConnector {
 	deleteTile(boardID, columnTitle, tileID){
 		var xhr = new XMLHttpRequest();
 
+		var connectorContext = this;
 		xhr.addEventListener("readystatechange", function () {
 			if (this.readyState === 4) {
-				this.callback(this);
+				connectorContext.getBoard(connectorContext.kanboard.board.boardID);
 			}
 		});
 
@@ -499,15 +634,16 @@ class ServerConnector {
 	swapTiles(boardID, columnTitle, tileID1, tileID2) {
 		var xhr = new XMLHttpRequest();
 
-		xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
-
+		var connectorContext = this;
 		xhr.addEventListener("readystatechange", function() {
 		if(this.readyState === 4) {
-			this.callback(this);
+			connectorContext.getBoard(connectorContext.kanboard.board.boardID);
 		}
 		});
 
 		xhr.open("PUT", this.uri + "/api/" + boardID + "/" + columnTitle + "/swap/");
+		
+		xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
 
 		xhr.send("tileID1=" + tileID1 + "&tileID2=" + tileID2);
 	}
@@ -515,15 +651,16 @@ class ServerConnector {
 	swapColumns(boardID, columnTitle1, columnTitle2) {
 		var xhr = new XMLHttpRequest();
 
-		xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
-
+		var connectorContext = this;
 		xhr.addEventListener("readystatechange", function() {
 		if(this.readyState === 4) {
-			this.callback(this);
+			connectorContext.getBoard(connectorContext.kanboard.board.boardID)
 		}
 		});
 
 		xhr.open("PUT", this.uri + "/api/" + boardID + "/columns/swap/");
+
+		xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
 
 		xhr.send("column1=" + columnTitle1 + "&column2=" + columnTitle2);
 	}
@@ -538,15 +675,16 @@ class ServerConnector {
 
 		var xhr = new XMLHttpRequest();
 
-		xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
-
+		var connectorContext = this;
 		xhr.addEventListener("readystatechange", function() {
 		if(this.readyState === 4) {
-			this.callback(this);
+			connectorContext.getBoard(connectorContext.kanboard.board.boardID)
 		}
 		});
 
 		xhr.open("PUT", this.uri + "/api/" + boardID + "/" + columnTitle + "/edit/");
+
+		xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
 
 		xhr.send("state=" + state);
 	}
@@ -554,9 +692,10 @@ class ServerConnector {
 	deleteColumn(boardID, columnTitle){
 		var xhr = new XMLHttpRequest();
 
+		var connectorContext = this;
 		xhr.addEventListener("readystatechange", function () {
 			if (this.readyState === 4) {
-				this.callback(this);
+				connectorContext.getBoard(connectorContext.kanboard.board.boardID)
 			}
 		});
 
