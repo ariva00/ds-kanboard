@@ -17,7 +17,7 @@ public class APIController {
 	public ResponseEntity<String> addBoard(@RequestParam (value = "boardTitle") String boardTitle) {
 		Board board = new Board(boardTitle);
 		DsKanboardApplication.getDataManager().addBoard(board);
-		String boardURI = "/api/" + board.getBoardID() + '/';
+		String boardURI = "/api/" + board.getId() + '/';
 		return new ResponseEntity<String>(boardURI, HttpStatus.OK);
 	}
 

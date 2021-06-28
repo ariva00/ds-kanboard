@@ -3,7 +3,6 @@ package com.pollofritto.model;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Date;
 
 /**
  * Class that represents a single kanboard
@@ -11,7 +10,7 @@ import java.util.Date;
  */
 public class Board implements Serializable{
 	
-	private long boardID;
+	private long id;
 	private String title;
 	private static long instanceCounter = 0L;
 	private List<Column> columns = new ArrayList<Column>();
@@ -21,13 +20,13 @@ public class Board implements Serializable{
 		this(instanceCounter++, title);
 	}
 
-	public Board(long boardID, String title) {
-		this.boardID = boardID;
+	public Board(long id, String title) {
+		this.id = id;
 		this.title = title;
 	}
 	
 	public Board(Board board) {
-		this(board.getBoardID(), board.getTitle());
+		this(board.getId(), board.getTitle());
 		for(Column column : board.getColumns()) {
 			this.columns.add(column.copy());
 		}
@@ -41,8 +40,8 @@ public class Board implements Serializable{
 		return columns;
 	}
 
-	public long getBoardID() {
-		return boardID;
+	public long getId() {
+		return id;
 	}
 
 	public void setTitle(String title) {

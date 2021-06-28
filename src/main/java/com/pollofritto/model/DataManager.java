@@ -52,7 +52,7 @@ public class DataManager {
 
 	private Board getBoard(long id) {
 		for (Board b: boards) {
-			if (b.getBoardID() == id)
+			if (b.getId() == id)
 				return b;
 		}
 		return null;
@@ -60,7 +60,7 @@ public class DataManager {
 
 	public Board getBoardClone(long id) {
 		for (Board b: boards) {
-			if (b.getBoardID() == id)
+			if (b.getId() == id)
 				return b.copy();
 		}
 		return null;
