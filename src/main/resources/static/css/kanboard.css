@@ -1,92 +1,301 @@
+.kanboard{
+	
+	--light-primary : #fffbea;
+	--primary-color : #ffd000;
+	--dark-primary : #f3a704;
+	--primary-color-desat : #686454;
+	--primary-color-transparent : #ffd00010;
+
+	--light-secondary : #f1f5f7;
+	--secondary-color :#1d1e25;
+	--dark-secondary: #1a1a1b;
+	--secondary-color-desat : rgb(48, 69, 82);
+
+	--board-back-color : rgb(55, 55, 58);
+}
+
+.kanboard{
+	--modal-container-background : rgba(255, 255, 255, 0.2);
+	--tile-background : var(--dark-secondary);
+	--board-background : var(--board-back-color);
+	--navbar-background : var(--dark-secondary);
+
+	--modal-background : var(--dark-secondary);
+
+	--text-content-backgrond : var(--secondary-color);
+	--text-content-text-color : var(--light-secondary);
+
+	--input-background : var(--secondary-color);
+	--input-text-color : var(--light-secondary);
+	--input-background-focus : var(--secondary-color);
+	--input-text-color-focus : var(--light-secondary);
+
+	--text-button-background : var(--dark-primary);
+	--text-button-text-color :var(--dark-secondary);
+	--text-button-background-hover : var(--primary-color);
+	--text-button-text-color-hover : var(--dark-secondary);
+
+	--unboxed-button-background : rgba(0, 0, 0, 0);
+	--unboxed-button-text-color : var(--primary-color-desat);
+	--unboxed-button-background-hover : var(--primary-color-transparent);
+	--unboxed-button-text-color-hover : var(--primary-color);
+
+	--cancel-button-background : rgba(0, 0, 0, 0);
+	--cancel-button-text-color : red;
+	--cancel-button-background-hover : rgba(255, 0, 0, 0.1);
+	--cancel-button-text-color-hover : red;
+	
+
+	--shadow-color : rgba(0, 0, 0, 0.5);
+
+	--text-color: var(--light-secondary);
+
+	
+
+	--font-family: 'IBM Plex Sans Condensed', sans-serif;
+
+	color: var(--text-color);
+	transition: 0.1s;
+}
+
 .kanboard.container{
+	position : relative;
+}
+
+.kanboard.navbar{
 	position: relative;
-}
-
-.kanboard.container.row{
-	position:absolute;
-	width: 100%;
-	height: 100%;
-
+	background-color : var(--navbar-background);
+	height: 10%;
 	display: flex;
-	flex-direction: row;
-	flex-wrap: initial;
+	align-items: center;
+	justify-content: space-between;
+	padding-left: 0.5rem;
+	padding-right: 0.5rem;
+	box-shadow: 0px 3px 10px var(--shadow-color);
 }
 
-@media (max-width : 600px) {
-	.kanboard.container.row{
-		display: block;
-		overflow: scroll;
-		flex-direction: unset;
-		flex-wrap: unset;
-	}
+.kanboard.board{
+	background-color: var(--board-background);
+	display: flex;
+	flex-wrap: nowrap;
+	flex-direction: row;
+	overflow: scroll;
+	top : 10%;
+	height: 90%;
+	width : 100%;
+	scroll-behavior: smooth;
+	z-index: -1;
 }
 
 .kanboard.column{
 	min-width: 20%;
+	display: flex;
+	flex-direction: column;
+	padding: 1%;
+	height: fit-content;
 }
 
-.kanboard.tile.container{
-	background-color: #ffffaa;
-	border-color: #ffaa00;
-	border-style: solid;
-	border-radius: 5px;
-	padding: 10px;
-}
-
-.kanboard.tile.title{
+.kanboard.tile{
 	position: relative;
-	padding: 0;
-	margin: 5px;
-	left: 0px;
-	top: 0px;
-	font-size: 1rem;
-	font-weight: bold;
-	
+	display: flex;
+	flex-direction: column;
+	background-color: var(--tile-background);
+	border-radius: 0.5rem;
+	padding: 1rem;
+	margin-top: 0.5rem;
+	margin-bottom: 0.5rem;
+	box-shadow: 1px 1px 5px var(--shadow-color);
 }
 
-.kanboard.tile.type{
-	position: relative;
-	float: right;
-	padding: 0;
-	margin: 5px;
-	right: 0px;
-	top: 0px;
-	font-size: 1rem;
-	color: #aaa;
-}
-
-.kanboard.tile.author{
-	position: relative;
-	float: right;
-	padding: 0;
-	margin: 5px;
-	right: 0px;
-	top: 0px;
-	font-size: 1rem;
+.kanboard.tile-author{
+	font-family: var(--font-family);
 	font-style: italic;
-	color: #aaa;
+	font-size: small;
+}
+
+.kanboard.tile-title{
+	font-family: var(--font-family);
+}
+
+.kanboard.tile-title.tile-informative{
+	font-weight: bold;
+}
+
+.kanboard.tile-title.tile-organizational{
+	font-style: italic;
+}
+
+.kanboard.column-title{
+	font-family: var(--font-family);
+	font-weight: bolder;
+	font-size: larger;
+}
+
+.kanboard.tile-content-text{
+	border-radius: 5px;
+	padding: 0.5em;
+	font-family: 'IBM Plex Sans Mono', monospace;;
+	background-color: var(--text-content-backgrond);
+	color: var(--text-content-text-color);
+}
+
+.kanboard.tile-content-image{
+	max-width: 100%;
+	border-radius: 0.5rem;
+	margin-top: 0.5rem;
+	margin-bottom: 0.5rem;
 }
 
 .kanboard.button{
-	background-color: #210;
-	border: none;
-	border-radius: 5px;
-	color: white;
-	padding: 5px;
-	text-align: center;
-	text-decoration: none;
-	transition: 0.15s;
+	cursor: pointer;
+	border-radius: 0.5rem;
+	margin: 0.3rem;
+	padding: 0.6rem;
+	display: flex;
+	align-items: center;
+	border:none;
+	font-family: var(--font-family);
+	font-weight: bold;
 }
 
-.kanboard.button:hover{
-	background-color: #fc0;
-	color: black;
+.kanboard.text-button{
+	cursor: pointer;
+	border-radius: 0.5rem;
+	color: var(--text-button-text-color);
+	background-color: var(--text-button-background);
+}
+
+.kanboard.cancel-button{
+	cursor: pointer;
+	border-radius: 0.5rem;
+	color: var(--cancel-button-text-color);
+	background-color: var(--cancel-button-background);
+}
+
+.kanboard.unboxed-button{
+	cursor: pointer;
+	border-radius: 0.5rem;
+	color: var(--unboxed-button-text-color);
+	background-color: var(--unboxed-button-background);
+}
+
+.kanboard.modal-container{
+	display: flex;
+	justify-content: center;
+	align-items: center;
+	position: absolute;
+	top : 0%;
+	left: 0%;
+	width: 100%;
+	height: 100%;
+	z-index: 3;
+	backdrop-filter: blur(20px);
+	background-color: var(--modal-container-background);
+}
+
+.kanboard.modal{
+	min-width: 20%;
+	border-radius: 20px;
+	padding: 2%;
+	z-index: 4;
+	background-color: var(--modal-background);
+	box-shadow: 1px 1px 5px var(--shadow-color);
+}
+
+.kanboard.right{
+	float: right;
+}
+
+.kanboard.tile-header{
+	display: flex;
+	flex-direction: row;
+	justify-content: space-between;
+	align-items: center;
+}
+
+.kanboard.form{
+	font-family: var(--font-family);
+	display: flex;
+	flex-direction: column;
+	align-items: stretch;
+}
+
+.kanboard.input{
+	font-family: var(--font-family);
+	color: var(--input-text-color);
+	border-style: none;
+	border-radius: 0.5rem;
+	margin: 0.3rem;
+	padding: 0.6rem;
+	background-color: var(--input-background);
 	
 }
 
-.kanboard.tile.image{
-	position: relative;
-	width: 100%;
-	height: 100%;
-	border-radius: 5px;
+.kanboard.input::placeholder{
+	color: var(--light-primary);
+	opacity: 1;
+}
+
+.kanboard.input::-ms-input-placeholder{
+	color: var(--light-primary);
+}
+
+.kanboard.input:-ms-input-placeholder{
+	color: var(--light-primary);
+}
+
+@media screen and (orientation : portrait) {
+	.kanboard.column{
+		min-width: 80%;
+	}
+}
+
+.kanboard.text-button:hover{
+	color: var(--text-button-text-color-hover);
+	background-color: var(--text-button-background-hover);
+	box-shadow: 1px 1px 5px var(--shadow-color);
+}
+
+.kanboard.unboxed-button:hover{
+	color: var(--unboxed-button-text-color-hover);
+	background-color: var(--unboxed-button-background-hover);
+}
+
+.kanboard.cancel-button:hover{
+	color: var(--cancel-button-text-color-hover);
+	background-color: var(--cancel-button-background-hover);
+}
+
+.kanboard.input:focus{
+	color: var(--input-text-color-focus);
+	background-color: var(--input-background-focus);
+	box-shadow: 1px 1px 5px var(--shadow-color);
+}
+
+.kanboard.tile:hover{
+	box-shadow: 5px 5px 10px var(--shadow-color);
+}
+
+.kanboard.modal:hover{
+	box-shadow: 5px 5px 10px var(--shadow-color);
+}
+
+.kanboard.tile-color{
+	position: absolute; 
+	top: 0%;
+	left: 0%;
+	width: 0.5em;
+	height: 100%;  
+	border-top-left-radius: 0.5rem; 
+	border-bottom-left-radius: 0.5rem;			
+}
+
+.kanboard.column-color{
+	position: absolute; 
+	top: 0%; 
+	left: 0%; 
+	width: 100%; 
+	height: 0.5em;  
+	border-top-left-radius: 0.5rem; 
+	border-top-right-radius: 0.5rem;
 }
