@@ -14,38 +14,65 @@ public class DataManager {
 		boards.add(board);
 	}
 
-	public List<Board> getBoards() {
+	private List<Board> getBoards() {
 		return boards;
 	}
 
-	public Board getBoard(long id) {
+	public List<Board> getBoardsClone() {
+		return boards;
+	}
+
+	private Board getBoard(long id) {
 		for (Board b: boards) {
 			if (b.getBoardID() == id)
 				return b;
 		}
-
 		return null;
 	}
 
-	public List<Column> getColumns(long boardID) {
+	public Board getBoardClone(long id) {
+		for (Board b: boards) {
+			if (b.getBoardID() == id)
+				return b.copy();
+		}
+		return null;
+	}
+
+	private List<Column> getColumns(long boardID) {
 		return getBoard(boardID).getColumns();
 	}
 
-	public Column getColumn(long boardID, String columnTitle) {
+	public List<Column> getColumnsClone(long boardID) {
+		return getBoard(boardID).copy().getColumns();
+	}
+
+	private Column getColumn(long boardID, String columnTitle) {
 		List<Column> columns = getBoard(boardID).getColumns();
 		for (Column c: columns) {
 			if (c.getTitle().equals(columnTitle))
 				return c;
 		}
-
 		return null;
 	}
 
-	public List<Tile> getColumnTiles(long boardID, String columnTitle) {
+	public Column getColumnClone(long boardID, String columnTitle) {
+		List<Column> columns = getBoard(boardID).getColumns();
+		for (Column c: columns) {
+			if (c.getTitle().equals(columnTitle))
+				return c.copy();
+		}
+		return null;
+	}
+
+	private List<Tile> getColumnTiles(long boardID, String columnTitle) {
 		return getColumn(boardID, columnTitle).getTiles();
 	}
 
-	public Tile getTile(long boardID, String columnTitle, long tileID) {
+	public List<Tile> getColumnTilesClone(long boardID, String columnTitle) {
+		return getColumn(boardID, columnTitle).copy().getTiles();
+	}
+
+	private Tile getTile(long boardID, String columnTitle, long tileID) {
 		Column selectedColumn = getColumn(boardID, columnTitle);
 		List<Tile> tiles = selectedColumn.getTiles();
 
@@ -57,11 +84,23 @@ public class DataManager {
 		return null;
 	}
 
+	public Tile getTileClone(long boardID, String columnTitle, long tileID) {
+		Column selectedColumn = getColumn(boardID, columnTitle);
+		List<Tile> tiles = selectedColumn.getTiles();
+
+		for (Tile t: tiles) {
+			if (t.getId() == tileID) {
+				return t.copy();
+			}
+		}
+		return null;
+	}
+
 	public void editColumn(long boardID, String columnTitle, Column editedColumn) {
 		List<Column> columns = getColumns(boardID);
 
 		for (Column c: columns) {
-			if (c.getTitle() == columnTitle) {
+			if (c.getTitle().equals(columnTitle)) {
 				c.setTitle(editedColumn.getTitle());
 				c.setState(editedColumn.getState());
 			}

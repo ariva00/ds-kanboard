@@ -23,7 +23,7 @@ public class APIController {
 
 	@GetMapping("/api/{boardID}/")
 	public Board getBoard(@PathVariable long boardID) {
-		return DsKanboardApplication.getDataManager().getBoard(boardID);
+		return DsKanboardApplication.getDataManager().getBoardClone(boardID);
 	}
 
 	@PostMapping("/upload/image/")
@@ -33,7 +33,7 @@ public class APIController {
 
 	@GetMapping("/api/boards/")
 	public List<Board> getBoards() {
-		return DsKanboardApplication.getDataManager().getBoards();
+		return DsKanboardApplication.getDataManager().getBoardsClone();
 	}
 
 	@PostMapping("/api/{boardID}/columns/add/")
@@ -49,13 +49,13 @@ public class APIController {
 
 	@GetMapping("/api/{boardID}/columns/")
 	public List<Column> getColumns(@PathVariable String boardID) {
-		return DsKanboardApplication.getDataManager().getColumns(Long.parseLong(boardID));
+		return DsKanboardApplication.getDataManager().getColumnsClone(Long.parseLong(boardID));
 	}
 
 	@GetMapping("/api/{boardID}/{columnTitle}/")
 	public Column getColumn(@PathVariable String boardID,
 							@PathVariable String columnTitle) {
-		return DsKanboardApplication.getDataManager().getColumn(Long.parseLong(boardID), columnTitle);
+		return DsKanboardApplication.getDataManager().getColumnClone(Long.parseLong(boardID), columnTitle);
 	}
 
 
@@ -65,7 +65,7 @@ public class APIController {
 											 @RequestParam (value = "title", required = false) String newTitle,
 											 @RequestParam (value = "state", required = false) ColumnState columnState) {
 
-		Column selectedColumn = DsKanboardApplication.getDataManager().getColumn(Long.parseLong(boardID), columnTitle);
+		Column selectedColumn = DsKanboardApplication.getDataManager().getColumnClone(Long.parseLong(boardID), columnTitle);
 
 		if (newTitle != null)
 			selectedColumn.setTitle(newTitle);
@@ -112,14 +112,14 @@ public class APIController {
 	@GetMapping("/api/{boardID}/{columnTitle}/tiles/")
 	public List<Tile> getColumnTiles(@PathVariable String boardID,
 									 @PathVariable String columnTitle) {
-		return DsKanboardApplication.getDataManager().getColumnTiles(Long.parseLong(boardID), columnTitle);
+		return DsKanboardApplication.getDataManager().getColumnTilesClone(Long.parseLong(boardID), columnTitle);
 	}
 
 	@GetMapping("/api/{boardID}/{columnTitle}/{tileID}/")
 	public Tile getTile(@PathVariable String boardID,
 						@PathVariable String columnTitle,
 						@PathVariable String tileID) {
-		return DsKanboardApplication.getDataManager().getTile(Long.parseLong(boardID), columnTitle, Long.parseLong(tileID));
+		return DsKanboardApplication.getDataManager().getTileClone(Long.parseLong(boardID), columnTitle, Long.parseLong(tileID));
 	}
 
 	@PutMapping("/api/{boardID}/{columnTitle}/{tileID}/edit/")
@@ -182,5 +182,6 @@ public class APIController {
 		DsKanboardApplication.getDataManager().swapTiles(Long.parseLong(boardID), columnTitle, Long.parseLong(tileID1), Long.parseLong(tileID2));
 		return new ResponseEntity<String>(HttpStatus.OK);
 	}
+
 
 }
