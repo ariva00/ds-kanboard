@@ -2,6 +2,124 @@ class Kanboard {
 
 }
 
+class ColumnElement {
+	constructor(boardID, column, tileEditModal, columnEditModal, tileCreationModal, serverConnector, prevTitle, succTitle){
+		this.rootNode = document.createElement("div");
+		this.rootNode.classList.add("kanboard", "column");
+		
+		this.tiles = new Array();
+
+		var columnHeaderElement = new ColumnHeaderElement(boardID, column, columnEditModal, serverConnector, prevTitle, succTitle);
+
+		this.rootNode.appendChild(columnHeaderElement);
+
+		for(var index in column.tiles){
+			var prevTileID = undefined;
+			var succTileID = undefined;
+
+			if(column.tiles[index - 1] != undefined)
+				prevTileID = column.tiles[index - 1].id;
+			
+			if(column.tiles[index + 1] != undefined)
+				succTileID = column.tiles[index + 1].id;
+
+			var tile = new TileElement(boardID, column.title, column.tiles[index], tileEditModal, serverConnector, prevTileID, succTileID)
+			this.tiles.add(tile);
+			this.rootNode.appendChild(tile.getNodeTree());
+		}
+
+		var tileCreationElement = new TileCreationElement(boardID, column.title, tileCreationModal);
+		this.rootNode.appendChild(tileCreationElement);
+
+	}
+}
+
+class ColumnHeaderElement {
+	constructor(boardID, column, columnEditModal, serverConnector, prevTitle, succTitle) {
+		this.rootNode = document.createElement("div");
+		this.rootNode.classList.add("kanboard", "tile");
+
+		var colorDiv = document.createElement("div");
+		colorDiv.classList.add("kanboard", "column-color");
+		colorDiv.style.backgroundColor = column.color;
+		this.rootNode.appendChild(colorDiv);
+
+		var tileHeader = document.createElement("div");
+		tileHeader.classList.add("kanboard", "tile-header");
+
+		var tileTitle = document.createElement("p");
+		tileTitle.classList.add("kanboard", "column-title");
+		tileTitle.append(column.title);
+
+		var buttonsSpan = document.createElement("span");
+		var archiveButton = document.createElement("span");
+		archiveButton.classList.add("material-icons-outlined", "kanboard", "unboxed-button")
+		archiveButton.append("archive");
+		archiveButton.onclick = function() {
+			serverConnector.archiveColumn(boardID, column.title);
+		}
+		buttonsSpan.appendChild(archiveButton);
+
+		var editButton = document.createElement("span");
+		editButton.classList.add("material-icons-outlined", "kanboard", "unboxed-button")
+		editButton.append("edit");
+		editButton.onclick = function() {
+			columnEditModal.edit(boardID, column.title);
+		}
+		buttonsSpan.appendChild(editButton);
+
+		var deleteButton = document.createElement("span");
+		deleteButton.classList.add("material-icons-outlined", "kanboard", "unboxed-button")
+		deleteButton.append("delete");
+		deleteButton.onclick = function() {
+			serverConnector.deleteColumn(boardID, column.title);
+		}
+		buttonsSpan.appendChild(deleteButton);
+
+		tileHeader.appendChild(buttonsSpan);
+
+		var columnRightLeftSpan = document.createElement("span");
+
+		if(prevTitle != undefined) {
+			var rightButton = document.createElement("span");
+			rightButton.classList.add("material-icons-outlined", "kanboard", "unboxed-button");
+			rightButton.append("arrow_back");
+			rightButton.onclick = function() {
+				serverConnector.swapColumns(boardID, column.title, prevTitle);
+			}
+			columnRightLeftSpan.appendChild(rightButton);
+		}
+		
+		if(succTitle != undefined) {
+			var leftButton = document.createElement("span");
+			leftButton.classList.add("material-icons-outlined", "kanboard", "unboxed-button");
+			leftButton.append("arrow_forward");
+			leftButton.onclick = function() {
+				serverConnector.swapColumns(boardID, column.title, succTitle);
+			}
+			columnRightLeftSpan.appendChild(leftButton);
+		}
+
+		this.rootNode.appendChild(columnRightLeftSpan);
+	}
+}
+
+class TileCreationElement {
+	constructor(boardID, columnTitle, tileCreationModal){
+		this.rootNode = document.createElement("div");
+		this.rootNode.classList.add("kanboard", "tile");
+		var createTileButton = document.createElement("span");
+		createTileButton.classList.add("kanboard", "button", "text-button");
+		createTileButton.onclick = function(){
+			tileCreationModal.createTile(boardID, columnTitle);
+		}
+		createTileButton.append("ADD TILE");
+		this.rootNode.appendChild(createTileButton);
+	}
+	
+	getNodeTree();
+}
+
 class TileElement {
 	constructor(boardID, columnTitle, tile, tileEditModal, serverConnector, prevID, succID){
 		this.tile = tile;
@@ -113,6 +231,10 @@ class TileElement {
 			fileButton.appendChild(icon);
 			this.rootNode.appendChild(fileButton);
 		}
+	}
+
+	getNodeTree(){
+		return this.rootNode();
 	}
 }
 
@@ -245,5 +367,58 @@ class ServerConnector {
 		xhr.open("PUT", this.uri + "/api/" + boardID + "/" + columnTitle + "/swap/");
 
 		xhr.send("tileID1=" + tileID1 + "&tileID2=" + tileID2);
+	}
+
+	swapColumns(boardID, columnTitle1, columnTitle2) {
+		var xhr = new XMLHttpRequest();
+
+		xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
+
+		xhr.addEventListener("readystatechange", function() {
+		if(this.readyState === 4) {
+			this.callback(this);
+		}
+		});
+
+		xhr.open("PUT", this.uri + "/api/" + boardID + "/columns/swap/");
+
+		xhr.send("column1=" + columnTitle1 + "&column2=" + columnTitle2);
+	}
+
+	archiveColumn(boardID, columnTitle, archive) {
+
+		var state = "archived";
+
+		if(archive == false){
+			state = "active";
+		}
+
+		var xhr = new XMLHttpRequest();
+
+		xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
+
+		xhr.addEventListener("readystatechange", function() {
+		if(this.readyState === 4) {
+			this.callback(this);
+		}
+		});
+
+		xhr.open("PUT", this.uri + "/api/" + boardID + "/" + columnTitle + "/edit/");
+
+		xhr.send("state=" + state);
+	}
+
+	deleteColumn(boardID, columnTitle){
+		var xhr = new XMLHttpRequest();
+
+		xhr.addEventListener("readystatechange", function () {
+			if (this.readyState === 4) {
+				this.callback(this);
+			}
+		});
+
+		xhr.open("DELETE", this.uri + "/api/" + boardID + "/" + columnTitle + "/delete/");
+
+		xhr.send();
 	}
 }
