@@ -1,17 +1,45 @@
 package com.pollofritto.model;
 
+import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import com.pollofritto.model.Column.ColumnState;
+import com.pollofritto.persistence.DataPersistenceManager;
 
 // TODO: Handling on board, column or tile not found
 public class DataManager {
 
-	private List<Board> boards = new ArrayList<Board>();
+	private DataPersistenceManager dataPersistenceManager;
+	
+	private List<Board> boards;
 
+	public DataManager(DataPersistenceManager persistence) {
+		this.dataPersistenceManager = persistence;
+		try {
+			Object o = dataPersistenceManager.getData();
+			if(o instanceof ArrayList)
+				boards = (ArrayList<Board>) o;
+			else throw new IOException();
+		} catch (ClassNotFoundException|IOException e) {
+			boards = new ArrayList<Board>();
+			e.printStackTrace();
+		}
+	}
+	
+	private void syncStorage() {
+		try {
+			dataPersistenceManager.storeData(boards);
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+	}
+	
 	public void addBoard(Board board) {
 		boards.add(board);
+		syncStorage();
 	}
 
 	private List<Board> getBoards() {
@@ -103,8 +131,10 @@ public class DataManager {
 			if (c.getTitle().equals(columnTitle)) {
 				c.setTitle(editedColumn.getTitle());
 				c.setState(editedColumn.getState());
+				syncStorage();
 			}
 		}
+		
 	}
 
 	public void editTile(long boardID, String columnTitle, long tileID, Tile editedTile) {
@@ -114,6 +144,7 @@ public class DataManager {
 		for (Tile t: tiles) {
 			if (t.getId() == tileID) {
 				tiles.set(tiles.indexOf(selectedTile), editedTile);
+				syncStorage();
 			}
 		}
 	}
@@ -128,6 +159,7 @@ public class DataManager {
 				return;
 		}
 		columns.add(column);
+		syncStorage();
 	}
 
 	// TODO: Exception on archived column
@@ -135,8 +167,10 @@ public class DataManager {
 		List<Tile> tiles = getColumnTiles(boardID, columnTitle);
 		Column column = getColumn(boardID, columnTitle);
 
-		if (column.getState().equals(ColumnState.active))
+		if (column.getState().equals(ColumnState.active)) {
 			tiles.add(tile);
+			syncStorage();
+		}
 	}
 
 	public void swapTiles(long boardID, String columnTitle, long tileID1, long tileID2) {
@@ -145,10 +179,9 @@ public class DataManager {
 		List<Tile> tiles = getColumnTiles(boardID, columnTitle);
 		int indexTile1 = tiles.indexOf(tile1);
 		int indexTile2 = tiles.indexOf(tile2);
-
-		Tile tmpTile = tile1;
-		tiles.set(indexTile1, tile2);
-		tiles.set(indexTile2, tmpTile);
+		
+		Collections.swap(tiles, indexTile1, indexTile2);
+		syncStorage();
 	}
 
 	public void swapColumns(long boardID, String column1Title, String column2Title) {
@@ -158,29 +191,32 @@ public class DataManager {
 		int indexColumn1 = columns.indexOf(column1);
 		int indexColumn2 = columns.indexOf(column2);
 
-		Column tmpColumn = column1;
-		columns.set(indexColumn1, column2);
-		columns.set(indexColumn2, tmpColumn);
+		Collections.swap(columns, indexColumn1, indexColumn2);
+		syncStorage();
 	}
 
 	public void deleteTile(long boardID, String columnTitle, long tileID) {
 		List<Tile> tiles = getColumnTiles(boardID, columnTitle);
 		Tile selectedTile = getTile(boardID, columnTitle, tileID);
 		tiles.remove(selectedTile);
+		syncStorage();
 	}
 
 	public void deleteColumn(long boardID, String columnTitle) {
 		List<Column> columns = getColumns(boardID);
 		Column selectedColumn = getColumn(boardID, columnTitle);
 
-		if (selectedColumn.getState().equals(ColumnState.active))
+		if (selectedColumn.getState().equals(ColumnState.active)) {
 			columns.remove(selectedColumn);
+			syncStorage();
+		}
 	}
 
 	public void deleteBoard(long boardID) {
 		List<Board> boards = getBoards();
 		Board selectedBoard = getBoard(boardID);
 		boards.remove(selectedBoard);
+		syncStorage();
 	}
 
 	public void moveTile(long boardID, String sourceColumnTitle, String destinationColumnTitle, long tileID) {
@@ -191,6 +227,7 @@ public class DataManager {
 		int sourceColumnTileIndex = sourceTiles.indexOf(selectedTile);
 		sourceTiles.remove(selectedTile);
 		destinationTiles.add(sourceColumnTileIndex, selectedTile);
+		syncStorage();
 	}
 
 }

@@ -1,5 +1,6 @@
 package com.pollofritto.model;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Date;
@@ -8,8 +9,8 @@ import java.util.Date;
  * Class that represents a single kanboard
  *
  */
-public class Board {
-
+public class Board implements Serializable{
+	
 	private long boardID;
 	private String title;
 	private static long instanceCounter = 0L;

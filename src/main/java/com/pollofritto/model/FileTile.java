@@ -1,6 +1,6 @@
 package com.pollofritto.model;
 
-public class FileTile extends Tile {
+public class FileTile extends Tile{
 
 	private String fileURI;
 	

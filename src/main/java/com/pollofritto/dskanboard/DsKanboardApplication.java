@@ -5,6 +5,7 @@ import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
 import com.pollofritto.persistence.FileStorageManager;
+import com.pollofritto.persistence.FileSystemDataPersistenceManager;
 import com.pollofritto.persistence.FileSystemFileStorageManager;
 
 @SpringBootApplication
@@ -18,8 +19,8 @@ public class DsKanboardApplication {
 		String userHome = System.getProperty("user.home");
 		String directory = "ds-kanboard";
 		
-		dataManager = new DataManager();
-		fileStorageHandler = new FileSystemFileStorageManager(userHome + fileSeparator + directory + fileSeparator);
+		dataManager = new DataManager(new FileSystemDataPersistenceManager(userHome + fileSeparator + directory + fileSeparator + "data" + fileSeparator, "data.dat"));
+		fileStorageHandler = new FileSystemFileStorageManager(userHome + fileSeparator + directory + fileSeparator + "uploads" + fileSeparator);
 		SpringApplication.run(DsKanboardApplication.class, args);
 	}
 

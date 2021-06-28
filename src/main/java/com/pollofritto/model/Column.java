@@ -1,5 +1,6 @@
 package com.pollofritto.model;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -7,7 +8,7 @@ import java.util.List;
  * Class that represents a single column in a kanboard
  *
  */
-public class Column {
+public class Column implements Serializable {
 
 	public enum ColumnState {active, archived}
 

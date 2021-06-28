@@ -1,10 +1,12 @@
 package com.pollofritto.model;
 
+import java.io.Serializable;
+
 /**
  * Class that represents a single tile in a kanboard
  *
  */
-public abstract class Tile {
+public abstract class Tile implements Serializable {
 
 	public enum TileType {Organizational, Informative}
 
