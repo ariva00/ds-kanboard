@@ -8,10 +8,12 @@ import com.pollofritto.model.Tile.TileType;
 
 import com.pollofritto.model.exceptions.InvalidRequestException;
 import com.pollofritto.model.exceptions.ObjectNotFoundException;
+import org.apache.juli.logging.Log;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.io.File;
 import java.util.List;
 
 @RestController
@@ -173,32 +175,44 @@ public class APIController {
 										   @RequestParam (value = "imageURI", required = false) String imageURI,
 										   @RequestParam (value = "fileURI", required = false) String fileURI,
 										   @RequestParam (value = "contentType") String contentType) throws BadRequestException, NotFoundException {
-		Tile editedTile;
-
-		switch (contentType) {
-			case "text":
-				editedTile = new TextTile(tileTitle, tileAuthor, TileType.valueOf(tileType), color, text);
-				break;
-			case "image":
-				editedTile = new ImageTile(tileTitle, tileAuthor, TileType.valueOf(tileType), color, imageURI);
-				break;
-			case "file":
-				editedTile = new FileTile(tileTitle, tileAuthor, TileType.valueOf(tileType), color, fileURI);
-				break;
-			default:
-				return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
-		}
 
 		try {
+			Tile selectedTile = DsKanboardApplication.getDataManager().getTileCopy(Long.parseLong(boardID), columnTitle, Long.parseLong(tileID));
+			Tile editedTile;
+
+			switch (contentType) {
+				case "text":
+					if (selectedTile instanceof  TextTile)
+						editedTile = new TextTile(tileTitle, tileAuthor, TileType.valueOf(tileType), color, text, Long.parseLong(tileID));
+					else
+						throw new BadRequestException("Cannot change tile class");
+					break;
+				case "image":
+					if (selectedTile instanceof ImageTile)
+						editedTile = new ImageTile(tileTitle, tileAuthor, TileType.valueOf(tileType), color, imageURI, Long.parseLong(tileID));
+					else
+						throw new BadRequestException("Cannot change tile class");
+					break;
+				case "file":
+					if (selectedTile instanceof FileTile)
+						editedTile = new FileTile(tileTitle, tileAuthor, TileType.valueOf(tileType), color, fileURI, Long.parseLong(tileID));
+					else
+						throw new BadRequestException("Cannot change tile class");
+					break;
+				default:
+					return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+			}
+
 			DsKanboardApplication.getDataManager().editTile(Long.parseLong(boardID), columnTitle, Long.parseLong(tileID), editedTile);
+			String tileURI = "/api/" + boardID + "/" + columnTitle + "/" + editedTile.getId() + '/';
+			return new ResponseEntity<>(tileURI, HttpStatus.OK);
+
 		} catch (InvalidRequestException e) {
 			throw new BadRequestException(e.getMessage());
 		} catch (ObjectNotFoundException e) {
 			throw new NotFoundException(e.getMessage());
 		}
 
-		String tileURI = "/api/" + boardID + "/" + columnTitle + "/" + editedTile.getId() + '/';
-		return new ResponseEntity<>(tileURI, HttpStatus.OK);
 	}
 
 	@PutMapping("/api/{boardID}/{columnTitle}/{tileID}/move/")

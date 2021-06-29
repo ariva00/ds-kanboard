@@ -19,7 +19,7 @@ public abstract class Tile implements Serializable {
 	private TileType tileType;
 	private String color;
 
-	private Tile(String title, String author, TileType tileType, String color, long id) {
+	public Tile(String title, String author, TileType tileType, String color, long id) {
 		this.id = id;
 		this.title = title;
 		this.author = author;

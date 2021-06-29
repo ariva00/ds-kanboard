@@ -10,6 +10,11 @@ public class TextTile extends Tile {
 		this.text = text;
 	}
 
+	public TextTile(String title, String author, TileType tileType, String color, String text, long id) {
+		super(title, author, tileType, color, id);
+		this.text = text;
+	}
+
 	public TextTile(TextTile tile) {
 		super(tile);
 		this.text = tile.getText();

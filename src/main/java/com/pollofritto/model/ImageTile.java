@@ -11,6 +11,11 @@ public class ImageTile extends Tile {
 		this.imageURI = imageURI;
 	}
 
+	public ImageTile(String title, String author, TileType tileType, String color, String imageURI, long id) {
+		super(title, author, tileType, color, id);
+		this.imageURI = imageURI;
+	}
+
 	public ImageTile(ImageTile tile) {
 		super(tile);
 		this.imageURI = tile.getImageURI();
