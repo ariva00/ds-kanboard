@@ -13,7 +13,6 @@ public abstract class Tile implements Serializable {
 	public enum TileType {Organizational, Informative}
 
 	private long id;
-	private static long instanceCounter = 0L;
 	private String title;
 	private String author;
 	private TileType tileType;
@@ -25,10 +24,6 @@ public abstract class Tile implements Serializable {
 		this.author = author;
 		this.tileType = tileType;
 		this.color = color;
-	}
-
-	public Tile(String title, String author, TileType tileType, String color) {
-		this(title, author, tileType, color, instanceCounter++);
 	}
 
 	public Tile(Tile tile) {

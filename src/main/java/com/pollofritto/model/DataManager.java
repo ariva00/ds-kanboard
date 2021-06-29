@@ -14,6 +14,9 @@ public class DataManager {
 	private DataPersistenceManager dataPersistenceManager;
 	
 	private List<Board> boards;
+	
+	private long lastTileID;
+	private long lastBoardID;
 
 	public DataManager(DataPersistenceManager persistence) {
 		this.dataPersistenceManager = persistence;
@@ -26,6 +29,20 @@ public class DataManager {
 			boards = new ArrayList<>();
 			e.printStackTrace();
 		}
+		updateLastIDs();
+	}
+	
+	private void updateLastIDs() {
+		lastBoardID = 0;
+		lastTileID = 0;
+		for(Board board : boards) {
+			if(board.getId() > lastBoardID)
+				lastBoardID = board.getId();
+			for(Column column : board.getColumns())
+				for(Tile tile : column.getTiles())
+					if(tile.getId() > lastTileID)
+						lastTileID = tile.getId();
+		}
 	}
 	
 	private void syncStorage() {
@@ -36,7 +53,15 @@ public class DataManager {
 		}
 	}
 	
-	public void addBoard(Board board) {
+	public synchronized long generateTileID() {
+		return ++lastTileID;
+	}
+	
+	public synchronized long generateBoardID() {
+		return ++lastBoardID;
+	}
+	
+	public synchronized void addBoard(Board board) {
 		boards.add(board);
 		syncStorage();
 	}
@@ -127,7 +152,7 @@ public class DataManager {
 		throw new TileNotFoundException("No tile found with id \"" + tileID + "\" in column \"" + columnTitle + "\" of \"" + boardID + "\" board");
 	}
 
-	public void editColumn(long boardID, String columnTitle, Column editedColumn) throws BoardNotFoundException, ColumnNotFoundException, InvalidRequestException {
+	public synchronized void editColumn(long boardID, String columnTitle, Column editedColumn) throws BoardNotFoundException, ColumnNotFoundException, InvalidRequestException {
 		List<Column> columns = getColumns(boardID);
 
 		for (Column c: columns) {
@@ -147,7 +172,7 @@ public class DataManager {
 		throw new ColumnNotFoundException("No column found with title \"" + columnTitle + "\" in board " + boardID);
 	}
 
-	public void editTile(long boardID, String columnTitle, long tileID, Tile editedTile) throws BoardNotFoundException, ColumnNotFoundException, TileNotFoundException, InvalidRequestException {
+	public synchronized void editTile(long boardID, String columnTitle, long tileID, Tile editedTile) throws BoardNotFoundException, ColumnNotFoundException, TileNotFoundException, InvalidRequestException {
 		Tile selectedTile = getTile(boardID, columnTitle, tileID);
 		List<Tile> tiles = getColumnTiles(boardID, columnTitle);
 		Column column = getColumn(boardID, columnTitle);
@@ -171,7 +196,7 @@ public class DataManager {
 			((FileTile)selectedTile).setFileURI(((FileTile)editedTile).getFileURI());
 	}
 
-	public void addColumn(long boardID, Column column) throws BoardNotFoundException, InvalidRequestException {
+	public synchronized void addColumn(long boardID, Column column) throws BoardNotFoundException, InvalidRequestException {
 		List<Column> columns = getColumns(boardID);
 
 		for (Column c: columns) {
@@ -182,7 +207,7 @@ public class DataManager {
 		syncStorage();
 	}
 
-	public void addTile(long boardID, String columnTitle, Tile tile) throws BoardNotFoundException, ColumnNotFoundException, InvalidRequestException {
+	public synchronized void addTile(long boardID, String columnTitle, Tile tile) throws BoardNotFoundException, ColumnNotFoundException, InvalidRequestException {
 		List<Tile> tiles = getColumnTiles(boardID, columnTitle);
 		Column column = getColumn(boardID, columnTitle);
 
@@ -199,7 +224,7 @@ public class DataManager {
 		}
 	}
 
-	public void swapTiles(long boardID, String columnTitle, long tileID1, long tileID2) throws BoardNotFoundException, ColumnNotFoundException, TileNotFoundException, InvalidRequestException {
+	public synchronized void swapTiles(long boardID, String columnTitle, long tileID1, long tileID2) throws BoardNotFoundException, ColumnNotFoundException, TileNotFoundException, InvalidRequestException {
 		Tile tile1 = getTile(boardID, columnTitle, tileID1);
 		Tile tile2 = getTile(boardID, columnTitle, tileID2);
 		List<Tile> tiles = getColumnTiles(boardID, columnTitle);
@@ -214,7 +239,7 @@ public class DataManager {
 		syncStorage();
 	}
 
-	public void swapColumns(long boardID, String column1Title, String column2Title) throws BoardNotFoundException, ColumnNotFoundException, InvalidRequestException {
+	public synchronized void swapColumns(long boardID, String column1Title, String column2Title) throws BoardNotFoundException, ColumnNotFoundException, InvalidRequestException {
 		Column column1 = getColumn(boardID, column1Title);
 		Column column2 = getColumn(boardID, column2Title);
 		List<Column> columns = getColumns(boardID);
@@ -228,7 +253,7 @@ public class DataManager {
 		syncStorage();
 	}
 
-	public void deleteTile(long boardID, String columnTitle, long tileID) throws BoardNotFoundException, ColumnNotFoundException, TileNotFoundException, InvalidRequestException {
+	public synchronized void deleteTile(long boardID, String columnTitle, long tileID) throws BoardNotFoundException, ColumnNotFoundException, TileNotFoundException, InvalidRequestException {
 		List<Tile> tiles = getColumnTiles(boardID, columnTitle);
 		Tile selectedTile = getTile(boardID, columnTitle, tileID);
 		Column column = getColumn(boardID, columnTitle);
@@ -241,7 +266,7 @@ public class DataManager {
 		}
 	}
 
-	public void deleteColumn(long boardID, String columnTitle) throws BoardNotFoundException, ColumnNotFoundException, InvalidRequestException {
+	public synchronized void deleteColumn(long boardID, String columnTitle) throws BoardNotFoundException, ColumnNotFoundException, InvalidRequestException {
 		List<Column> columns = getColumns(boardID);
 		Column selectedColumn = getColumn(boardID, columnTitle);
 
@@ -253,7 +278,7 @@ public class DataManager {
 		}
 	}
 
-	public void moveTile(long boardID, String sourceColumnTitle, String destinationColumnTitle, long tileID) throws BoardNotFoundException, ColumnNotFoundException, TileNotFoundException, InvalidRequestException {
+	public synchronized void moveTile(long boardID, String sourceColumnTitle, String destinationColumnTitle, long tileID) throws BoardNotFoundException, ColumnNotFoundException, TileNotFoundException, InvalidRequestException {
 		List<Tile> sourceTiles = getColumnTiles(boardID, sourceColumnTitle);
 		List<Tile> destinationTiles = getColumnTiles(boardID, destinationColumnTitle);
 		Tile selectedTile = getTile(boardID, sourceColumnTitle, tileID);

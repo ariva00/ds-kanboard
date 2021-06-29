@@ -8,12 +8,10 @@ import com.pollofritto.model.Tile.TileType;
 
 import com.pollofritto.model.exceptions.InvalidRequestException;
 import com.pollofritto.model.exceptions.ObjectNotFoundException;
-import org.apache.juli.logging.Log;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.io.File;
 import java.util.List;
 
 @RestController
@@ -21,7 +19,7 @@ public class APIController {
 
 	@PostMapping("/api/boards/add/")
 	public ResponseEntity<String> addBoard(@RequestParam (value = "boardTitle") String boardTitle) {
-		Board board = new Board(boardTitle);
+		Board board = new Board(DsKanboardApplication.getDataManager().generateBoardID(), boardTitle);
 		DsKanboardApplication.getDataManager().addBoard(board);
 		String boardURI = "/api/" + board.getId() + '/';
 		return new ResponseEntity<>(boardURI, HttpStatus.OK);
@@ -118,13 +116,13 @@ public class APIController {
 
 		switch (contentType) {
 			case "text":
-				newTile = new TextTile(title, author, TileType.valueOf(tileType), color, text);
+				newTile = new TextTile(title, author, TileType.valueOf(tileType), color, text, DsKanboardApplication.getDataManager().generateTileID());
 				break;
 			case "image":
-				newTile = new ImageTile(title, author, TileType.valueOf(tileType), color, imageURI);
+				newTile = new ImageTile(title, author, TileType.valueOf(tileType), color, imageURI, DsKanboardApplication.getDataManager().generateTileID());
 				break;
 			case "file":
-				newTile = new FileTile(title, author, TileType.valueOf(tileType), color, fileURI);
+				newTile = new FileTile(title, author, TileType.valueOf(tileType), color, fileURI, DsKanboardApplication.getDataManager().generateTileID());
 				break;
 			default:
 				return new ResponseEntity<>(HttpStatus.BAD_REQUEST);

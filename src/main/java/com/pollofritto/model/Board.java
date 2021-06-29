@@ -13,12 +13,7 @@ public class Board implements Serializable{
 	private static final long serialVersionUID = 2L;
 	private long id;
 	private String title;
-	private static long instanceCounter = 0L;
 	private List<Column> columns = new ArrayList<Column>();
-
-	public Board(String title) {
-		this(instanceCounter++, title);
-	}
 
 	public Board(long id, String title) {
 		this.id = id;

@@ -322,3 +322,8 @@
 .kanboard.button.kanboard.text-button.disabled {
 	background-color: var(--secondary-color-desat);
 }
+
+.kanboard.button.kanboard.text-button.disabled:hover {
+	box-shadow: none;
+	cursor: default;
+}

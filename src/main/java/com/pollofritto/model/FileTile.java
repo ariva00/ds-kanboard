@@ -4,11 +4,6 @@ public class FileTile extends Tile {
 
 	private static final long serialVersionUID = 2L;
 	private String fileURI;
-	
-	public FileTile(String title, String author, TileType tileType, String color, String fileURI) {
-		super(title, author, tileType, color);
-		this.fileURI = fileURI;
-	}
 
 	public FileTile(String title, String author, TileType tileType, String color, String fileURI, long id) {
 		super(title, author, tileType, color, id);

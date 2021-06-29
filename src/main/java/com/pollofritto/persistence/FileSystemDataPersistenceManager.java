@@ -20,7 +20,7 @@ public class FileSystemDataPersistenceManager extends DataPersistenceManager {
 	}
 	
 	@Override
-	public void storeData(Object o) throws IOException {
+	public synchronized void storeData(Object o) throws IOException {
 		FileOutputStream outStream = new FileOutputStream(new File(path + System.getProperty("file.separator") +filename));
 		ObjectOutputStream objectOutStream = new ObjectOutputStream(outStream);
 		objectOutStream.writeObject(o);
@@ -29,7 +29,7 @@ public class FileSystemDataPersistenceManager extends DataPersistenceManager {
 	}
 
 	@Override
-	public Object getData() throws IOException, ClassNotFoundException {
+	public synchronized Object getData() throws IOException, ClassNotFoundException {
 		Object o;
 		FileInputStream inStream = new FileInputStream(new File(path + System.getProperty("file.separator") +filename));
 		ObjectInputStream objectInputStream = new ObjectInputStream(inStream);

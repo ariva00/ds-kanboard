@@ -5,11 +5,6 @@ public class TextTile extends Tile {
 	private static final long serialVersionUID = 2L;
 	private String text;
 
-	public TextTile(String title, String author, TileType tileType, String color, String text) {
-		super(title, author, tileType, color);
-		this.text = text;
-	}
-
 	public TextTile(String title, String author, TileType tileType, String color, String text, long id) {
 		super(title, author, tileType, color, id);
 		this.text = text;
