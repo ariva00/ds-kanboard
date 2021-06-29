@@ -1,6 +1,6 @@
 class Kanboard {
 
-	constructor(containerID, uri){
+	constructor(containerID, uri) {
 
 		this.uri = uri;
 
@@ -20,7 +20,7 @@ class Kanboard {
 		this.loginModal.login();
 	}
 
-	init(username){
+	init(username) {
 		this.serverConnector = new ServerConnector(this.uri, this);
 
 		this.username = username;
@@ -40,92 +40,90 @@ class Kanboard {
 
 	}
 
-	updateBoard(){
-		if(this.boardElement != undefined){
+	updateBoard() {
+		if (this.boardElement != undefined) {
 			this.rootNode.removeChild(this.boardElement.getNodeTree());
 		}
 		this.boardElement = new BoardElement(this.board, this.tileEditModal, this.columnEditModal, this.tileCreationModal, this.columnCreationModal, this.serverConnector, this.state);
 		this.rootNode.append(this.boardElement.getNodeTree());
 	}
 
-	updateBoards(){
+	updateBoards() {
 		this.serverConnector.getBoardsHeaders();
 	}
 
-	updateNavbar(){
-		if(this.navbarElement != undefined){
+	updateNavbar() {
+		if (this.navbarElement != undefined) {
 			this.rootNode.removeChild(this.navbarElement.getNodeTree())
 		}
 		this.navbarElement = new NavbarElement(this.boards, this.serverConnector, this, this.boardCreationModal, this.loginModal);
 		this.rootNode.appendChild(this.navbarElement.getNodeTree());
 	}
 
-	setState(state){
+	setState(state) {
 		this.state = state;
-		console.log(state);
 		this.updateBoard();
 	}
 
-	getState(){
+	getState() {
 		return this.state;
 	}
-	
+
 }
 
 class NavbarElement {
 
-	constructor(boards, serverConnector, kanboard, boardCreationModal, loginModal){
+	constructor(boards, serverConnector, kanboard, boardCreationModal, loginModal) {
 		this.rootNode = document.createElement("div");
 		this.rootNode.classList.add("kanboard", "navbar");
-		
+
 		var buttonsSpan = document.createElement("span");
 		buttonsSpan.style.display = "flex";
 
-		
-		
 
-		if(boards != undefined && boards.length > 0){
+
+
+		if (boards != undefined && boards.length > 0) {
 			var select = document.createElement("select");
 			select.classList.add("kanboard", "input");
-			for(var board of boards){
-				console.log(board);
+			for (var board of boards) {
 				var option = document.createElement("option");
 				option.setAttribute("value", board.id);
-				option.append(board.title); 
+				option.append(board.title);
 				select.appendChild(option);
 			}
-	
-			select.onchange = function(){
+
+			select.onchange = function () {
 				serverConnector.getBoard(select.value);
 			}
-	
+
 			buttonsSpan.appendChild(select);
 			serverConnector.getBoard(select.value);
 
 			var archiveButton = document.createElement("button");
 			archiveButton.classList.add("kanboard", "button", "text-button");
 			archiveButton.append("SHOW ARCHIVED");
-			archiveButton.onclick = function(){
-				if(kanboard.getState() == "archived"){
+			archiveButton.onclick = function () {
+				if (kanboard.getState() == "archived") {
 					kanboard.setState("active");
 					archiveButton.removeChild(archiveButton.firstChild);
 					archiveButton.append("SHOW ARCHIVED");
 				}
-					
-				else if(kanboard.getState() == "active"){
+
+				else if (kanboard.getState() == "active") {
 					kanboard.setState("archived");
 					archiveButton.removeChild(archiveButton.firstChild);
 					archiveButton.append("SHOW ACTIVE");
 				}
-					
+
 			}
 			buttonsSpan.appendChild(archiveButton);
 		}
-		
+
 		var newBoardButton = document.createElement("button");
 		newBoardButton.classList.add("kanboard", "button", "text-button");
 		newBoardButton.append("ADD BOARD");
-		newBoardButton.onclick = function() {
+		newBoardButton.onclick = function () {
 			boardCreationModal.createBoard();
 		}
 		buttonsSpan.appendChild(newBoardButton);
@@ -143,16 +141,16 @@ class NavbarElement {
 		icon.append("account_circle");
 		loginButton.appendChild(icon);
 
-		loginButton.onclick = function(){
+		loginButton.onclick = function () {
 			loginModal.login();
 		}
 
 		this.rootNode.append(loginButton);
 
-		
+
 	}
 
-	getNodeTree(){
+	getNodeTree() {
 		return this.rootNode;
 	}
 }
@@ -170,19 +168,19 @@ class BoardElement {
 		}
 
 		for (var index in columns) {
-			if(columns[index].state == state){
+			if (columns[index].state == state) {
 				var prevTitle = undefined;
 				var succTitle = undefined;
 
 
-				if(state == "active"){
-					if(columns[+index - 1] != undefined)
+				if (state == "active") {
+					if (columns[+index - 1] != undefined)
 						prevTitle = board.columns[+index - 1].title;
-			
-					if(columns[+index + 1] != undefined)
+
+					if (columns[+index + 1] != undefined)
 						succTitle = columns[+index + 1].title;
 				}
-				
+
 
 				var column = new ColumnElement(board.id, columns[index], tileEditModal, columnEditModal, tileCreationModal, serverConnector, prevTitle, succTitle);
 
@@ -190,14 +188,14 @@ class BoardElement {
 			}
 		}
 
-		if(state == "active"){
-			var columnCreationElement = new ColumnCreationElement (board.id, columnCreationModal);
+		if (state == "active") {
+			var columnCreationElement = new ColumnCreationElement(board.id, columnCreationModal);
 			this.rootNode.appendChild(columnCreationElement.getNodeTree());
 		}
-		
+
 	}
 
-	getNodeTree(){
+	getNodeTree() {
 		return this.rootNode;
 	}
 
@@ -208,13 +206,13 @@ class ColumnCreationElement {
 	constructor(boardID, columnCreationModal) {
 		this.rootNode = document.createElement("div");
 		this.rootNode.classList.add("kanboard", "column");
-		
+
 		var tile = document.createElement("div");
 		tile.classList.add("kanboard", "tile");
 
 		var span = document.createElement("span");
 		span.classList.add("kanboard", "button", "text-button");
-		span.onclick = function(){
+		span.onclick = function () {
 			columnCreationModal.createColumn(boardID);
 		}
 		span.append("ADD COLUMN");
@@ -223,7 +221,7 @@ class ColumnCreationElement {
 		this.rootNode.appendChild(tile);
 	}
 
-	getNodeTree(){
+	getNodeTree() {
 		return this.rootNode;
 	}
 
@@ -234,37 +232,37 @@ class ColumnElement {
 	constructor(boardID, column, tileEditModal, columnEditModal, tileCreationModal, serverConnector, prevTitle, succTitle) {
 		this.rootNode = document.createElement("div");
 		this.rootNode.classList.add("kanboard", "column");
-		
+
 
 		var columnHeaderElement = new ColumnHeaderElement(boardID, column, columnEditModal, serverConnector, prevTitle, succTitle);
 
 		this.rootNode.appendChild(columnHeaderElement.getNodeTree());
 
-		for(var index in column.tiles){
+		for (var index in column.tiles) {
 			var prevTileID = undefined;
 			var succTileID = undefined;
 
-			if(column.state == "active"){
-				if(column.tiles[+index - 1] != undefined)
+			if (column.state == "active") {
+				if (column.tiles[+index - 1] != undefined)
 					prevTileID = column.tiles[+index - 1].id;
-				
-				if(column.tiles[+index + 1] != undefined)
+
+				if (column.tiles[+index + 1] != undefined)
 					succTileID = column.tiles[+index + 1].id;
 			}
-			
+
 
 			var tile = new TileElement(boardID, column.title, column.tiles[index], tileEditModal, serverConnector, column.state, prevTileID, succTileID);
 			this.rootNode.appendChild(tile.getNodeTree());
 		}
 
-		if(column.state == "active"){
+		if (column.state == "active") {
 			var tileCreationElement = new TileCreationElement(boardID, column.title, tileCreationModal);
 			this.rootNode.appendChild(tileCreationElement.getNodeTree());
 		}
-		
+
 	}
 
-	getNodeTree(){
+	getNodeTree() {
 		return this.rootNode;
 	}
 
@@ -293,27 +291,27 @@ class ColumnHeaderElement {
 		var archiveButton = document.createElement("span");
 		archiveButton.classList.add("material-icons-outlined", "kanboard", "unboxed-button")
 
-		if(column.state == "active"){
+		if (column.state == "active") {
 			archiveButton.append("archive");
-			archiveButton.onclick = function() {
+			archiveButton.onclick = function () {
 				serverConnector.archiveColumn(boardID, column.title);
 			}
 		}
 
-		if(column.state == "archived"){
+		if (column.state == "archived") {
 			archiveButton.append("unarchive");
-			archiveButton.onclick = function() {
+			archiveButton.onclick = function () {
 				serverConnector.archiveColumn(boardID, column.title, false);
 			}
 		}
 
 		buttonsSpan.appendChild(archiveButton);
 
-		if(column.state == "active"){
+		if (column.state == "active") {
 			var editButton = document.createElement("span");
 			editButton.classList.add("material-icons-outlined", "kanboard", "unboxed-button")
 			editButton.append("edit");
-			editButton.onclick = function() {
+			editButton.onclick = function () {
 				columnEditModal.edit(boardID, column.title);
 			}
 			buttonsSpan.appendChild(editButton);
@@ -321,14 +319,14 @@ class ColumnHeaderElement {
 			var deleteButton = document.createElement("span");
 			deleteButton.classList.add("material-icons-outlined", "kanboard", "delete-button");
 			deleteButton.append("delete");
-			deleteButton.onclick = function() {
+			deleteButton.onclick = function () {
 				serverConnector.deleteColumn(boardID, column.title);
 			}
 			buttonsSpan.appendChild(deleteButton);
 		}
-		
 
-		
+
+
 
 		tileHeader.appendChild(buttonsSpan);
 
@@ -336,21 +334,21 @@ class ColumnHeaderElement {
 
 		var columnRightLeftSpan = document.createElement("span");
 
-		if(prevTitle != undefined) {
+		if (prevTitle != undefined) {
 			var rightButton = document.createElement("span");
 			rightButton.classList.add("material-icons-outlined", "kanboard", "unboxed-button");
 			rightButton.append("arrow_back");
-			rightButton.onclick = function() {
+			rightButton.onclick = function () {
 				serverConnector.swapColumns(boardID, column.title, prevTitle);
 			}
 			columnRightLeftSpan.appendChild(rightButton);
 		}
-		
-		if(succTitle != undefined) {
+
+		if (succTitle != undefined) {
 			var leftButton = document.createElement("span");
 			leftButton.classList.add("material-icons-outlined", "kanboard", "unboxed-button");
 			leftButton.append("arrow_forward");
-			leftButton.onclick = function() {
+			leftButton.onclick = function () {
 				serverConnector.swapColumns(boardID, column.title, succTitle);
 			}
 			columnRightLeftSpan.appendChild(leftButton);
@@ -359,99 +357,99 @@ class ColumnHeaderElement {
 		this.rootNode.appendChild(columnRightLeftSpan);
 	}
 
-	getNodeTree(){
+	getNodeTree() {
 		return this.rootNode;
 	}
 
 }
 
 class TileCreationElement {
-	constructor(boardID, columnTitle, tileCreationModal){
+	constructor(boardID, columnTitle, tileCreationModal) {
 		this.rootNode = document.createElement("div");
 		this.rootNode.classList.add("kanboard", "tile");
 		var createTileButton = document.createElement("span");
 		createTileButton.classList.add("kanboard", "button", "text-button");
-		createTileButton.onclick = function(){
+		createTileButton.onclick = function () {
 			tileCreationModal.createTile(boardID, columnTitle);
 		}
 		createTileButton.append("ADD TILE");
 		this.rootNode.appendChild(createTileButton);
 	}
-	
-	getNodeTree(){
+
+	getNodeTree() {
 		return this.rootNode;
 	}
 }
 
 class TileElement {
-	constructor(boardID, columnTitle, tile, tileEditModal, serverConnector, state, prevID, succID){
+	constructor(boardID, columnTitle, tile, tileEditModal, serverConnector, state, prevID, succID) {
 		this.tile = tile;
 		this.rootNode = document.createElement("div");
 		this.rootNode.classList.add("kanboard", "tile");
-		
+
 		var colorDiv = document.createElement("div");
 		colorDiv.classList.add("kanboard", "tile-color");
 		colorDiv.style.backgroundColor = tile.color;
 		this.rootNode.appendChild(colorDiv);
 
-		
+
 		var tileHeader = document.createElement("div");
 		tileHeader.classList.add("kanboard", "buttons-line");
-		
+
 		var tileTitle = document.createElement("p");
-		if(tile.tileType == "Informative")
+		if (tile.tileType == "Informative")
 			tileTitle.classList.add("kanboard", "tile-title", "tile-informative");
 		else
 			tileTitle.classList.add("kanboard", "tile-title", "tile-organizational");
 		tileTitle.append(tile.title);
 		tileHeader.appendChild(tileTitle);
 
-		
+
 		var tileEditDeleteDiv = document.createElement("div");
 
-		if(state == "active"){
+		if (state == "active") {
 			var editButton = document.createElement("span");
 			editButton.append("edit");
 			editButton.classList.add("material-icons-outlined", "kanboard", "unboxed-button");
-			editButton.onclick = function(){
+			editButton.onclick = function () {
 				tileEditModal.edit(boardID, columnTitle, tile);
 			};
 			tileEditDeleteDiv.appendChild(editButton);
-			
+
 			var deleteButton = document.createElement("span");
 			deleteButton.append("delete")
 			deleteButton.classList.add("material-icons-outlined", "kanboard", "delete-button");
-			deleteButton.onclick = function(){
+			deleteButton.onclick = function () {
 				serverConnector.deleteTile(boardID, columnTitle, tile.id);
 			}
 			tileEditDeleteDiv.appendChild(deleteButton);
 		}
-		
+
 
 		tileHeader.appendChild(tileEditDeleteDiv);
 		this.rootNode.appendChild(tileHeader);
 
-		
+
 		tileHeader = document.createElement("div");
 		tileHeader.classList.add("kanboard", "buttons-line");
-		
+
 		var tileUpDownDiv = document.createElement("div");
-		
-		if(prevID != undefined){
+
+		if (prevID != undefined) {
 			var upButton = document.createElement("span");
 			upButton.append("arrow_upward");
 			upButton.classList.add("material-icons-outlined", "kanboard", "unboxed-button");
-			upButton.onclick = function(){
+			upButton.onclick = function () {
 				serverConnector.swapTiles(boardID, columnTitle, tile.id, prevID);
 			}
 			tileUpDownDiv.appendChild(upButton);
 		}
-		
-		if(succID != undefined){
+
+		if (succID != undefined) {
 			var downButton = document.createElement("span");
 			downButton.append("arrow_downward");
 			downButton.classList.add("material-icons-outlined", "kanboard", "unboxed-button");
-			downButton.onclick = function(){
+			downButton.onclick = function () {
 				serverConnector.swapTiles(boardID, columnTitle, tile.id, succID);
 			}
 			tileUpDownDiv.appendChild(downButton);
@@ -459,32 +457,32 @@ class TileElement {
 
 		tileHeader.appendChild(tileUpDownDiv);
 
-		
+
 		var tileAuthor = document.createElement("p");
-		if(tile.tileType = "Informative")
+		if (tile.tileType = "Informative")
 			tileAuthor.classList.add("kanboard", "tile-author");
 		tileAuthor.append(tile.author);
 		tileHeader.appendChild(tileAuthor);
 		this.rootNode.appendChild(tileHeader);
 
-		
-		if(tile.text != undefined){
+
+		if (tile.text != undefined) {
 			var p = document.createElement("p");
 			p.append(tile.text);
 			p.classList.add("kanboard", "tile-content-text");
 			this.rootNode.appendChild(p);
 		}
 
-		if(tile.imageURI != undefined){
+		if (tile.imageURI != undefined) {
 			var img = document.createElement("img");
 			img.setAttribute("src", "/images/" + tile.imageURI);
 			img.classList.add("kanboard", "tile-content-image");
 			this.rootNode.appendChild(img);
 		}
-		
-		if(tile.fileURI != undefined){
+
+		if (tile.fileURI != undefined) {
 			var fileButton = document.createElement("a");
-			fileButton.classList.add("kanboard", "right", "button", "text-button" );
+			fileButton.classList.add("kanboard", "right", "button", "text-button");
 			fileButton.setAttribute("href", "/files/" + tile.fileURI);
 			var span = document.createElement("span");
 			span.append(tile.fileURI);
@@ -497,13 +495,13 @@ class TileElement {
 		}
 	}
 
-	getNodeTree(){
+	getNodeTree() {
 		return this.rootNode;
 	}
 }
 
 class Modal {
-	constructor(serverConnector, author){
+	constructor(serverConnector, author) {
 		this.serverConnector = serverConnector;
 		this.author = author;
 
@@ -516,30 +514,30 @@ class Modal {
 		this.rootNode.appendChild(this.modalDiv);
 	}
 
-	getNodeTree(){
+	getNodeTree() {
 		return this.rootNode;
 	}
 
-	show(){
+	show() {
 		this.rootNode.style.display = "flex";
 	}
 
-	hide(){
+	hide() {
 		this.rootNode.style.display = "none";
 	}
 
 }
 
-class TileCreationModal extends Modal{
+class TileCreationModal extends Modal {
 
-	constructor(serverConnector, author){
+	constructor(serverConnector, author) {
 		super(serverConnector, author);
 
 		var modalContext = this;
 
 		this.form = document.createElement("form");
 		this.form.classList.add("kanboard", "form");
-		this.form.onchange = function(){
+		this.form.onchange = function () {
 			modalContext.validate();
 		}
 
@@ -561,7 +559,7 @@ class TileCreationModal extends Modal{
 
 		var option = document.createElement("option");
 		option.setAttribute("value", "Organizational");
-		option.append("Organizational"); 
+		option.append("Organizational");
 		this.selectType.appendChild(option);
 
 		this.form.appendChild(this.selectType);
@@ -577,12 +575,12 @@ class TileCreationModal extends Modal{
 
 		var option = document.createElement("option");
 		option.setAttribute("value", "image");
-		option.append("Image"); 
+		option.append("Image");
 		this.selectContent.appendChild(option);
 
 		var option = document.createElement("option");
 		option.setAttribute("value", "file");
-		option.append("File"); 
+		option.append("File");
 		this.selectContent.appendChild(option);
 
 		this.form.appendChild(this.selectContent);
@@ -614,7 +612,7 @@ class TileCreationModal extends Modal{
 
 		this.fileForm = document.createElement("form");
 		this.fileForm.classList.add("kanboard", "form");
-		this.fileForm.onchange = function(){
+		this.fileForm.onchange = function () {
 			modalContext.validate();
 		}
 
@@ -636,11 +634,11 @@ class TileCreationModal extends Modal{
 
 		this.modalDiv.appendChild(this.fileForm);
 
-		
+
 
 		var buttonsDiv = document.createElement("div");
 		buttonsDiv.classList.add("kanboard", "buttons-line");
-		
+
 		this.createButton = document.createElement("button");
 		this.createButton.classList.add("kanboard", "button", "text-button");
 		this.createButton.append("CREATE");
@@ -649,16 +647,16 @@ class TileCreationModal extends Modal{
 		var cancelButton = document.createElement("button");
 		cancelButton.classList.add("kanboard", "button", "cancel-button");
 		cancelButton.append("CANCEL");
-		cancelButton.onclick = function(){
+		cancelButton.onclick = function () {
 			modalContext.hide();
 		}
 		buttonsDiv.append(cancelButton);
 
 		this.modalDiv.append(buttonsDiv);
-		
+
 	}
 
-	createTile(boardID, columnTitle){
+	createTile(boardID, columnTitle) {
 		this.boardID = boardID;
 		this.columnTitle = columnTitle;
 		this.titleInput.value = "";
@@ -669,14 +667,12 @@ class TileCreationModal extends Modal{
 
 		this.show();
 		this.validate();
-
-		console.log("/api/" + boardID + "/" + columnTitle + "/tiles/add/");
 	}
 
-	validate(){
+	validate() {
 		var modalContext = this;
-		this.createButton.onclick = function(){
-			switch(modalContext.selectContent.value){
+		this.createButton.onclick = function () {
+			switch (modalContext.selectContent.value) {
 				case "text":
 					modalContext.serverConnector.createTextTile(modalContext.boardID, modalContext.columnTitle, modalContext.form);
 					break;
@@ -692,22 +688,28 @@ class TileCreationModal extends Modal{
 		if (this.titleInput.value == "") {
 			valid = false;
 		}
-		
-		switch (this.selectContent.value){
+
+		switch (this.selectContent.value) {
 			case "text":
 				this.fileLabel.disabled = true;
+				this.fileLabel.classList.add("disabled");
 				this.fileInput.disabled = true;
+				this.fileInput.classList.add("disabled");
 				this.textInput.disabled = false;
-				if(this.textInput.value == ""){
+				this.textInput.classList.remove("disabled");
+				if (this.textInput.value == "") {
 					valid = false;
 				}
-					
+
 				break;
 			case "image":
 				this.fileLabel.disabled = false;
+				this.fileLabel.classList.remove("disabled");
 				this.fileInput.disabled = false;
+				this.fileInput.classList.remove("disabled");
 				this.textInput.disabled = true;
-				if (this.fileInput.value == ""){
+				this.textInput.classList.add("disabled");
+				if (this.fileInput.value == "") {
 					valid = false;
 					this.filename.firstChild.remove();
 					this.filename.append("select file")
@@ -719,9 +721,12 @@ class TileCreationModal extends Modal{
 				break;
 			case "file":
 				this.fileLabel.disabled = false;
+				this.fileLabel.classList.add("disabled");
 				this.fileInput.disabled = false;
+				this.fileInput.classList.add("disabled");
 				this.textInput.disabled = true;
-				if (this.fileInput.value == ""){
+				this.textInput.classList.remove("disabled");
+				if (this.fileInput.value == "") {
 					valid = false;
 					this.filename.firstChild.remove();
 					this.filename.append("select file");
@@ -731,8 +736,8 @@ class TileCreationModal extends Modal{
 				}
 				this.fileURIInput.setAttribute("name", "fileURI");
 		}
-		
-		if(valid){
+
+		if (valid) {
 			this.createButton.disabled = false;
 			this.createButton.classList.remove("disabled");
 		} else {
@@ -743,9 +748,9 @@ class TileCreationModal extends Modal{
 
 }
 
-class ColumnCreationModal extends Modal{
+class ColumnCreationModal extends Modal {
 
-	constructor(serverConnector){
+	constructor(serverConnector) {
 		super(serverConnector);
 		this.form = document.createElement("form");
 		this.form.classList.add("kanboard", "form");
@@ -769,7 +774,7 @@ class ColumnCreationModal extends Modal{
 
 		var buttonsDiv = document.createElement("div");
 		buttonsDiv.classList.add("kanboard", "buttons-line");
-		
+
 		this.createButton = document.createElement("button");
 		this.createButton.classList.add("kanboard", "button", "text-button");
 		this.createButton.append("CREATE");
@@ -778,35 +783,48 @@ class ColumnCreationModal extends Modal{
 		var cancelButton = document.createElement("button");
 		cancelButton.classList.add("kanboard", "button", "cancel-button");
 		cancelButton.append("CANCEL");
-		cancelButton.onclick = function(){
+		cancelButton.onclick = function () {
 			modalContext.hide();
 		}
 		buttonsDiv.append(cancelButton);
 
 		this.modalDiv.append(buttonsDiv);
-		
+
 	}
-	
-	createColumn(boardID){
-		console.log("/api/" + boardID + "/columns/add/");
+
+	createColumn(boardID) {
 		this.titleInput.value = "";
-		this.colorInput.value = "#f00";
+		this.colorInput.value = "#f000";
 
 		var modalContext = this;
-		this.createButton.onclick = function(){
+		this.createButton.onclick = function () {
 			modalContext.serverConnector.createColumn(boardID, new FormData(modalContext.form));
 			modalContext.hide();
 		}
 		this.show();
+		this.validate();
+	}
 
-		
+	validate() {
+		var valid = ture;
+		if (this.titleInput.value == "" || this.titleInput.value == undefined) {
+			valid = false
+		}
+
+		if (valid) {
+			this.createButton.disabled = false;
+			this.createButton.classList.remove("disabled");
+		} else {
+			this.createButton.disabled = true;
+			this.createButton.classList.add("disabled");
+		}
 	}
 
 }
 
-class BoardCreationModal extends Modal{
+class BoardCreationModal extends Modal {
 
-	constructor(serverConnector){
+	constructor(serverConnector) {
 		super(serverConnector);
 		this.form = document.createElement("form");
 		this.form.classList.add("kanboard", "form");
@@ -824,11 +842,11 @@ class BoardCreationModal extends Modal{
 
 		var buttonsDiv = document.createElement("div");
 		buttonsDiv.classList.add("kanboard", "buttons-line");
-		
+
 		this.createButton = document.createElement("button");
 		this.createButton.classList.add("kanboard", "button", "text-button");
 		this.createButton.append("CREATE");
-		this.createButton.onclick = function(){
+		this.createButton.onclick = function () {
 			modalContext.serverConnector.createBoard(new FormData(modalContext.form));
 			modalContext.hide();
 		}
@@ -837,33 +855,49 @@ class BoardCreationModal extends Modal{
 		var cancelButton = document.createElement("button");
 		cancelButton.classList.add("kanboard", "button", "cancel-button");
 		cancelButton.append("CANCEL");
-		cancelButton.onclick = function(){
+		cancelButton.onclick = function () {
 			modalContext.hide();
 		}
 		buttonsDiv.append(cancelButton);
 
 		this.modalDiv.append(buttonsDiv);
-		
+
 	}
-	
-	createBoard(){
-		console.log("/api/boards/add/");
+
+	createBoard() {
 		this.titleInput.value = "";
 		this.show();
+		this.validate();
+		this.titleInput.focus();
+	}
+
+	validate() {
+		var valid = ture;
+		if (this.titleInput.value == "" || this.titleInput.value == undefined) {
+			valid = false
+		}
+
+		if (valid) {
+			this.createButton.disabled = false;
+			this.createButton.classList.remove("disabled");
+		} else {
+			this.createButton.disabled = true;
+			this.createButton.classList.add("disabled");
+		}
 	}
 
 }
 
-class TileEditModal extends Modal{
+class TileEditModal extends Modal {
 
-	constructor(serverConnector, author){
+	constructor(serverConnector, author) {
 		super(serverConnector, author);
 
 		var modalContext = this;
 
 		this.form = document.createElement("form");
 		this.form.classList.add("kanboard", "form");
-		this.form.onchange = function(){
+		this.form.onchange = function () {
 			modalContext.validate();
 		}
 
@@ -913,7 +947,7 @@ class TileEditModal extends Modal{
 
 		this.fileForm = document.createElement("form");
 		this.fileForm.classList.add("kanboard", "form");
-		this.fileForm.onchange = function(){
+		this.fileForm.onchange = function () {
 			modalContext.validate();
 		}
 
@@ -935,11 +969,9 @@ class TileEditModal extends Modal{
 
 		this.modalDiv.appendChild(this.fileForm);
 
-		
-
 		var buttonsDiv = document.createElement("div");
 		buttonsDiv.classList.add("kanboard", "buttons-line");
-		
+
 		this.createButton = document.createElement("button");
 		this.createButton.classList.add("kanboard", "button", "text-button");
 		this.createButton.append("SAVE");
@@ -948,24 +980,24 @@ class TileEditModal extends Modal{
 		var cancelButton = document.createElement("button");
 		cancelButton.classList.add("kanboard", "button", "cancel-button");
 		cancelButton.append("CANCEL");
-		cancelButton.onclick = function(){
+		cancelButton.onclick = function () {
 			modalContext.hide();
 		}
 		buttonsDiv.append(cancelButton);
 
 		this.modalDiv.append(buttonsDiv);
-		
+
 	}
 
-	edit(boardID, columnTitle, tile){
+	edit(boardID, columnTitle, tile) {
 		this.boardID = boardID;
 		this.columnTitle = columnTitle;
 		this.tileID = tile.id;
 		this.titleInput.value = tile.title;
-		
+
 		this.textInput.value = "";
 
-		if(tile.text != undefined) {
+		if (tile.text != undefined) {
 			this.selectContent.value = "text";
 			this.textInput.value = tile.text;
 		} else if (tile.imageURI != undefined) {
@@ -982,8 +1014,8 @@ class TileEditModal extends Modal{
 			this.filename.append("Select File");
 		}
 
-		
-		switch (this.selectContent.value){
+
+		switch (this.selectContent.value) {
 			case "text":
 				this.fileLabel.disabled = true;
 				this.fileInput.disabled = true;
@@ -1011,13 +1043,13 @@ class TileEditModal extends Modal{
 
 		this.selectType.value = tile.tileType;
 
-		
+
 
 		this.colorInput.value = tile.color;
 
 		var modalContext = this;
-		this.createButton.onclick = function(){
-			switch(modalContext.selectContent.value){
+		this.createButton.onclick = function () {
+			switch (modalContext.selectContent.value) {
 				case "text":
 					modalContext.serverConnector.editTextTile(modalContext.boardID, modalContext.columnTitle, modalContext.tileID, modalContext.form);
 					break;
@@ -1032,25 +1064,24 @@ class TileEditModal extends Modal{
 
 		this.show();
 		this.validate();
-
-		console.log("/api/" + boardID + "/" + columnTitle + "/" + tile.id + "/edit/");
+		this.titleInput.focus();
 	}
 
-	validate(){
-		
+	validate() {
+
 		var valid = true;
 		if (this.titleInput.value == "") {
 			valid = false;
 		}
-		
-		switch (this.selectContent.value){
+
+		switch (this.selectContent.value) {
 			case "text":
-				if(this.textInput.value == ""){
+				if (this.textInput.value == "") {
 					valid = false;
 				}
 				break;
 			case "image":
-				if (this.fileInput.value == ""){
+				if (this.fileInput.value == "") {
 					this.filename.firstChild.remove();
 					this.filename.append("select file")
 				} else {
@@ -1059,7 +1090,7 @@ class TileEditModal extends Modal{
 				}
 				break;
 			case "file":
-				if (this.fileInput.value == ""){
+				if (this.fileInput.value == "") {
 					this.filename.firstChild.remove();
 					this.filename.append("select file");
 				} else {
@@ -1067,8 +1098,8 @@ class TileEditModal extends Modal{
 					this.filename.append(this.fileInput.files[0].name);
 				}
 		}
-		
-		if(this.fileInput.value == ""){
+
+		if (this.fileInput.value == "") {
 			this.filename.firstChild.remove();
 			this.filename.append("select file");
 		} else {
@@ -1076,7 +1107,7 @@ class TileEditModal extends Modal{
 			this.filename.append(this.fileInput.files[0].name);
 		}
 
-		if(valid){
+		if (valid) {
 			this.createButton.disabled = false;
 			this.createButton.classList.remove("disabled");
 		} else {
@@ -1087,21 +1118,87 @@ class TileEditModal extends Modal{
 
 }
 
-class ColumnEditModal extends Modal{
+class ColumnEditModal extends Modal {
 
-	edit(boardID, columnTitle){
-		console.log("/api/" + boardID + "/" + columnTitle + "/edit/");
+	constructor(serverConnector) {
+		super(serverConnector);
+		this.form = document.createElement("form");
+		this.form.classList.add("kanboard", "form");
+
+		this.titleInput = document.createElement("input");
+		this.titleInput.classList.add("kanboard", "input");
+		this.titleInput.setAttribute("type", "text");
+		this.titleInput.setAttribute("placeholder", "title");
+		this.titleInput.setAttribute("name", "columnTitle");
+		this.form.appendChild(this.titleInput);
+
+		this.colorInput = document.createElement("input");
+		this.colorInput.classList.add("kanboard", "input");
+		this.colorInput.setAttribute("type", "color");
+		this.colorInput.setAttribute("name", "color");
+		this.form.appendChild(this.colorInput);
+
+		this.modalDiv.appendChild(this.form);
+
+		var modalContext = this;
+
+		var buttonsDiv = document.createElement("div");
+		buttonsDiv.classList.add("kanboard", "buttons-line");
+
+		this.createButton = document.createElement("button");
+		this.createButton.classList.add("kanboard", "button", "text-button");
+		this.createButton.append("SAVE");
+		buttonsDiv.append(this.createButton);
+
+		var cancelButton = document.createElement("button");
+		cancelButton.classList.add("kanboard", "button", "cancel-button");
+		cancelButton.append("CANCEL");
+		cancelButton.onclick = function () {
+			modalContext.hide();
+		}
+		buttonsDiv.append(cancelButton);
+
+		this.modalDiv.append(buttonsDiv);
+
+	}
+
+	edit(boardID, columnTitle) {
+		this.titleInput.value = columnTitle;
+		this.colorInput.value = "#f000";
+
+		var modalContext = this;
+		this.createButton.onclick = function () {
+			modalContext.serverConnector.editColumn(boardID, columnTitle, new FormData(modalContext.form));
+			modalContext.hide();
+		}
+		this.show();
+		this.validate();
+	}
+
+	validate() {
+		var valid = ture;
+		if (this.titleInput.value == "" || this.titleInput.value == undefined) {
+			valid = false
+		}
+
+		if (valid) {
+			this.createButton.disabled = false;
+			this.createButton.classList.remove("disabled");
+		} else {
+			this.createButton.disabled = true;
+			this.createButton.classList.add("disabled");
+		}
 	}
 
 }
 
-class LoginModal extends Modal{
+class LoginModal extends Modal {
 
-	constructor(kanboard){
+	constructor(kanboard) {
 		super();
 		var form = document.createElement("form");
 		form.classList.add("kanboard", "form");
-		
+
 		var usernameInput = document.createElement("input");
 		usernameInput.classList.add("kanboard", "input");
 		usernameInput.setAttribute("type", "text");
@@ -1118,24 +1215,23 @@ class LoginModal extends Modal{
 		this.modalDiv.appendChild(button);
 
 
-		usernameInput.onchange = function(){
-			if(usernameInput.value == "" || usernameInput.value == undefined){
+		usernameInput.onchange = function () {
+			if (usernameInput.value == "" || usernameInput.value == undefined) {
 				button.disabled = true;
 			}
-			else{
+			else {
 				button.disabled = false;
 			}
 		}
 
 		var modalContext = this;
-		button.onclick = function(){
+		button.onclick = function () {
 			kanboard.init(usernameInput.value);
 			modalContext.hide();
 		}
 	}
 
-	login(){
-		console.log("login");
+	login() {
 		this.show();
 	}
 
@@ -1148,7 +1244,7 @@ class ServerConnector {
 		this.kanboard = kanboard;
 	}
 
-	createBoard(data){
+	createBoard(data) {
 		var xhr = new XMLHttpRequest();
 
 		var connectorContext = this;
@@ -1163,7 +1259,7 @@ class ServerConnector {
 		xhr.send(data);
 	}
 
-	createColumn(boardID, data){
+	createColumn(boardID, data) {
 		var xhr = new XMLHttpRequest();
 
 		var connectorContext = this;
@@ -1277,7 +1373,7 @@ class ServerConnector {
 		xhr.send();
 	}
 
-	deleteTile(boardID, columnTitle, tileID){
+	deleteTile(boardID, columnTitle, tileID) {
 		var xhr = new XMLHttpRequest();
 
 		var connectorContext = this;
@@ -1296,14 +1392,14 @@ class ServerConnector {
 		var xhr = new XMLHttpRequest();
 
 		var connectorContext = this;
-		xhr.addEventListener("readystatechange", function() {
-		if(this.readyState === 4) {
-			connectorContext.getBoard(connectorContext.kanboard.board.id);
-		}
+		xhr.addEventListener("readystatechange", function () {
+			if (this.readyState === 4) {
+				connectorContext.getBoard(connectorContext.kanboard.board.id);
+			}
 		});
 
 		xhr.open("PUT", this.uri + "/api/" + boardID + "/" + columnTitle + "/tiles/swap/");
-		
+
 		xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
 
 		xhr.send("tileID1=" + tileID1 + "&tileID2=" + tileID2);
@@ -1313,10 +1409,10 @@ class ServerConnector {
 		var xhr = new XMLHttpRequest();
 
 		var connectorContext = this;
-		xhr.addEventListener("readystatechange", function() {
-		if(this.readyState === 4) {
-			connectorContext.getBoard(connectorContext.kanboard.board.id)
-		}
+		xhr.addEventListener("readystatechange", function () {
+			if (this.readyState === 4) {
+				connectorContext.getBoard(connectorContext.kanboard.board.id)
+			}
 		});
 
 		xhr.open("PUT", this.uri + "/api/" + boardID + "/columns/swap/");
@@ -1330,17 +1426,17 @@ class ServerConnector {
 
 		var state = "archived";
 
-		if(archive == false){
+		if (archive == false) {
 			state = "active";
 		}
 
 		var xhr = new XMLHttpRequest();
 
 		var connectorContext = this;
-		xhr.addEventListener("readystatechange", function() {
-		if(this.readyState === 4) {
-			connectorContext.getBoard(connectorContext.kanboard.board.id)
-		}
+		xhr.addEventListener("readystatechange", function () {
+			if (this.readyState === 4) {
+				connectorContext.getBoard(connectorContext.kanboard.board.id)
+			}
 		});
 
 		xhr.open("PUT", this.uri + "/api/" + boardID + "/" + columnTitle + "/edit/");
@@ -1350,7 +1446,7 @@ class ServerConnector {
 		xhr.send("state=" + state);
 	}
 
-	deleteColumn(boardID, columnTitle){
+	deleteColumn(boardID, columnTitle) {
 		var xhr = new XMLHttpRequest();
 
 		var connectorContext = this;
@@ -1365,8 +1461,8 @@ class ServerConnector {
 		xhr.send();
 	}
 
-	editFileTile(boardID, columnTitle, tileID, fileForm,  fileInput, fileURIInput, dataForm) {
-		if(fileInput.value == "" || fileInput.value == undefined){
+	editFileTile(boardID, columnTitle, tileID, fileForm, fileInput, fileURIInput, dataForm) {
+		if (fileInput.value == "" || fileInput.value == undefined) {
 			this.editTile(boardID, columnTitle, tileID, new FormData(dataForm));
 		} else {
 			var xhr = new XMLHttpRequest();
@@ -1386,7 +1482,7 @@ class ServerConnector {
 	}
 
 	editImageTile(boardID, columnTitle, tileID, fileForm, fileInput, fileURIInput, dataForm) {
-		if(fileInput.value == "" || fileInput.value == undefined){
+		if (fileInput.value == "" || fileInput.value == undefined) {
 			this.editTile(boardID, columnTitle, tileID, new FormData(dataForm));
 		} else {
 			var xhr = new XMLHttpRequest();
@@ -1395,7 +1491,6 @@ class ServerConnector {
 			xhr.addEventListener("readystatechange", function () {
 				if (this.readyState === 4) {
 					fileURIInput.value = this.responseText;
-					console.log(this.response);
 					connectorContext.editTile(boardID, columnTitle, tileID, new FormData(dataForm));
 				}
 			});
@@ -1404,7 +1499,7 @@ class ServerConnector {
 
 			xhr.send(new FormData(fileForm));
 		}
-		
+
 	}
 
 	editTextTile(boardID, columnTitle, tileID, dataForm) {
@@ -1422,6 +1517,21 @@ class ServerConnector {
 		});
 
 		xhr.open("PUT", this.uri + "/api/" + boardID + "/" + columnTitle + "/" + tileID + "/edit/");
+
+		xhr.send(data);
+	}
+
+	editColumn(boardID, columnTitle, data) {
+		var xhr = new XMLHttpRequest();
+
+		var connectorContext = this;
+		xhr.addEventListener("readystatechange", function () {
+			if (this.readyState === 4) {
+				connectorContext.getBoard(boardID);
+			}
+		});
+
+		xhr.open("put", this.uri + "/api/" + boardID + "/" + columnTitle + "/edit/");
 
 		xhr.send(data);
 	}
