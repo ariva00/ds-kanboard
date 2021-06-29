@@ -2,10 +2,11 @@ package com.pollofritto.model;
 
 public class TextTile extends Tile {
 
+	private static final long serialVersionUID = 2L;
 	private String text;
 
-	public TextTile(String title, String author, TileType tileType, String text) {
-		super(title, author, tileType);
+	public TextTile(String title, String author, TileType tileType, String color, String text) {
+		super(title, author, tileType, color);
 		this.text = text;
 	}
 

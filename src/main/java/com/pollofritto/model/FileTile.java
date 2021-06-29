@@ -1,12 +1,12 @@
 package com.pollofritto.model;
 
-public class FileTile extends Tile{
+public class FileTile extends Tile {
 
-	private static final long serialVersionUID = 1;
+	private static final long serialVersionUID = 2L;
 	private String fileURI;
 	
-	public FileTile(String title, String author, TileType tileType, String fileURI) {
-		super(title, author, tileType);
+	public FileTile(String title, String author, TileType tileType, String color, String fileURI) {
+		super(title, author, tileType, color);
 		this.fileURI = fileURI;
 	}
 	

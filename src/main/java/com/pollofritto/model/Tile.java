@@ -8,7 +8,7 @@ import java.io.Serializable;
  */
 public abstract class Tile implements Serializable {
 
-	private static final long serialVersionUID = 1;
+	private static final long serialVersionUID = 2L;
 
 	public enum TileType {Organizational, Informative}
 
@@ -17,23 +17,33 @@ public abstract class Tile implements Serializable {
 	private String title;
 	private String author;
 	private TileType tileType;
+	private String color;
 
-	private Tile(String title, String author, TileType tileType, long id) {
+	private Tile(String title, String author, TileType tileType, String color, long id) {
 		this.id = id;
 		this.title = title;
 		this.author = author;
 		this.tileType = tileType;
+		this.color = color;
 	}
 
-	public Tile(String title, String author, TileType tileType) {
-		this(title, author, tileType, instanceCounter++);
+	public Tile(String title, String author, TileType tileType, String color) {
+		this(title, author, tileType, color, instanceCounter++);
 	}
 
 	public Tile(Tile tile) {
-		this(tile.getTitle(), tile.getAuthor(), tile.getTileType(), tile.getId());
+		this(tile.getTitle(), tile.getAuthor(), tile.getTileType(), tile.getColor(), tile.getId());
 	}
 
 	public abstract Tile copy();
+
+	public String getColor() {
+		return color;
+	}
+
+	public void setColor(String color) {
+		this.color = color;
+	}
 
 	public long getId() {
 		return id;

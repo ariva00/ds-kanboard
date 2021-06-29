@@ -10,12 +10,11 @@ import java.util.List;
  */
 public class Board implements Serializable{
 
-	private static final long serialVersionUID = 1;
+	private static final long serialVersionUID = 2L;
 	private long id;
 	private String title;
 	private static long instanceCounter = 0L;
 	private List<Column> columns = new ArrayList<Column>();
-
 
 	public Board(String title) {
 		this(instanceCounter++, title);
@@ -32,7 +31,7 @@ public class Board implements Serializable{
 			this.columns.add(column.copy());
 		}
 	}
-	
+
 	public Board copy() {
 		return new Board(this);
 	}

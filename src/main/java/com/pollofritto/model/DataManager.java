@@ -138,6 +138,8 @@ public class DataManager {
 					c.setTitle(editedColumn.getTitle());
 				if (editedColumn.getState() != null)
 					c.setState(editedColumn.getState());
+				if (editedColumn.getColor() != null)
+					c.setColor(editedColumn.getColor());
 				syncStorage();
 				return;
 			}
@@ -154,13 +156,13 @@ public class DataManager {
 			throw new InvalidRequestException("Cannot edit tile from archived board");
 		}
 
-		for (Tile t: tiles) {
-			if (t.getId() == tileID) {
-				tiles.set(tiles.indexOf(selectedTile), editedTile);
-				syncStorage();
-				return;
-			}
-		}
+		if (editedTile.getTitle() != null)
+			selectedTile.setTitle(editedTile.getTitle());
+		if (editedTile.getAuthor() != null)
+			selectedTile.setAuthor(editedTile.getAuthor());
+		if (editedTile.getColor() != null)
+			selectedTile.setColor(editedTile.getColor());
+
 		throw new TileNotFoundException("No tile found with id \"" + tileID + "\" in column \"" + columnTitle + "\" of \"" + boardID + "\" board");
 	}
 

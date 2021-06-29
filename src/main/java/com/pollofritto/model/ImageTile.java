@@ -1,13 +1,13 @@
 package com.pollofritto.model;
 
-public class ImageTile extends Tile{
+public class ImageTile extends Tile {
 
 
-	private static final long serialVersionUID = 1;
+	private static final long serialVersionUID = 2L;
 	private String imageURI;
 
-	public ImageTile(String title, String author, TileType tileType, String imageURI) {
-		super(title, author, tileType);
+	public ImageTile(String title, String author, TileType tileType, String color, String imageURI) {
+		super(title, author, tileType, color);
 		this.imageURI = imageURI;
 	}
 

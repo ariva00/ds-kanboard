@@ -41,9 +41,14 @@ public class APIController {
 
 	@PostMapping("/api/{boardID}/columns/add/")
 	public ResponseEntity<String> addColumn(@PathVariable String boardID,
-											@RequestParam (value = "columnTitle") String columnTitle) throws BadRequestException, NotFoundException {
+											@RequestParam (value = "columnTitle") String columnTitle,
+											@RequestParam (value = "color", required = false) String color) throws BadRequestException, NotFoundException {
 
-		Column column = new Column(columnTitle);
+		Column column = new Column(columnTitle, color);
+
+		if (columnTitle.isEmpty())
+			throw new BadRequestException("Column title cannot be empty");
+
 		try {
 			DsKanboardApplication.getDataManager().addColumn(Long.parseLong(boardID), column);
 		} catch (InvalidRequestException e) {
@@ -79,9 +84,10 @@ public class APIController {
 	public ResponseEntity<String> editColumn(@PathVariable String boardID,
 											 @PathVariable String columnTitle,
 											 @RequestParam (value = "columnTitle", required = false) String newTitle,
-											 @RequestParam (value = "state", required = false) ColumnState columnState) throws BadRequestException, NotFoundException {
+											 @RequestParam (value = "state", required = false) ColumnState columnState,
+											 @RequestParam (value = "color", required = false) String color) throws BadRequestException, NotFoundException {
 
-		Column editedColumn = new Column(newTitle, columnState);
+		Column editedColumn = new Column(newTitle, columnState, color);
 
 		try {
 			DsKanboardApplication.getDataManager().editColumn(Long.parseLong(boardID), columnTitle, editedColumn);
@@ -97,25 +103,26 @@ public class APIController {
 
 	@PostMapping("/api/{boardID}/{columnTitle}/tiles/add/")
 	public ResponseEntity<String> addTile(@PathVariable String boardID,
-										   @PathVariable String columnTitle,
-										   @RequestParam (value = "tileTitle") String title,
-										   @RequestParam (value = "author") String author,
-										   @RequestParam (value = "tileType") String tileType,
-										   @RequestParam (value = "text", required = false) String text,
-										   @RequestParam (value = "imageURI", required = false) String imageURI,
-										   @RequestParam (value = "fileURI", required = false) String fileURI,
-										   @RequestParam (value = "contentType") String contentType) throws BadRequestException, NotFoundException {
+										  @PathVariable String columnTitle,
+										  @RequestParam (value = "tileTitle") String title,
+										  @RequestParam (value = "author") String author,
+										  @RequestParam (value = "tileType") String tileType,
+										  @RequestParam (value = "color") String color,
+										  @RequestParam (value = "text", required = false) String text,
+										  @RequestParam (value = "imageURI", required = false) String imageURI,
+										  @RequestParam (value = "fileURI", required = false) String fileURI,
+										  @RequestParam (value = "contentType") String contentType) throws BadRequestException, NotFoundException {
 		Tile newTile;
 
 		switch (contentType) {
 			case "text":
-				newTile = new TextTile(title, author, TileType.valueOf(tileType), text);
+				newTile = new TextTile(title, author, TileType.valueOf(tileType), color, text);
 				break;
 			case "image":
-				newTile = new ImageTile(title, author, TileType.valueOf(tileType), imageURI);
+				newTile = new ImageTile(title, author, TileType.valueOf(tileType), color, imageURI);
 				break;
 			case "file":
-				newTile = new FileTile(title, author, TileType.valueOf(tileType), fileURI);
+				newTile = new FileTile(title, author, TileType.valueOf(tileType), color, fileURI);
 				break;
 			default:
 				return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
@@ -161,6 +168,7 @@ public class APIController {
 										   @RequestParam (value = "tileTitle") String tileTitle,
 										   @RequestParam (value = "author") String tileAuthor,
 										   @RequestParam (value = "tileType") String tileType,
+										   @RequestParam (value = "color") String color,
 										   @RequestParam (value = "text", required = false) String text,
 										   @RequestParam (value = "imageURI", required = false) String imageURI,
 										   @RequestParam (value = "fileURI", required = false) String fileURI,
@@ -169,13 +177,13 @@ public class APIController {
 
 		switch (contentType) {
 			case "text":
-				editedTile = new TextTile(tileTitle, tileAuthor, TileType.valueOf(tileType), text);
+				editedTile = new TextTile(tileTitle, tileAuthor, TileType.valueOf(tileType), color, text);
 				break;
 			case "image":
-				editedTile = new ImageTile(tileTitle, tileAuthor, TileType.valueOf(tileType), imageURI);
+				editedTile = new ImageTile(tileTitle, tileAuthor, TileType.valueOf(tileType), color, imageURI);
 				break;
 			case "file":
-				editedTile = new FileTile(tileTitle, tileAuthor, TileType.valueOf(tileType), fileURI);
+				editedTile = new FileTile(tileTitle, tileAuthor, TileType.valueOf(tileType), color, fileURI);
 				break;
 			default:
 				return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
