@@ -45,10 +45,10 @@ public class DataManager {
 		return boards;
 	}
 
-	public List<Board> getBoardsClone() {
+	public List<Board> getBoardsCopy() {
 		List<Board> boardsCopy = new ArrayList<Board>();
 		for (Board b: getBoards()) {
-			boardsCopy.add(b);
+			boardsCopy.add(b.copy());
 		}
 		return boardsCopy;
 	}
@@ -61,7 +61,7 @@ public class DataManager {
 		throw new BoardNotFoundException("No board found with id: " + id);
 	}
 
-	public Board getBoardClone(long id) throws  BoardNotFoundException {
+	public Board getBoardCopy(long id) throws  BoardNotFoundException {
 		for (Board b: boards) {
 			if (b.getId() == id)
 				return b.copy();
@@ -73,7 +73,7 @@ public class DataManager {
 		return getBoard(boardID).getColumns();
 	}
 
-	public List<Column> getColumnsClone(long boardID) throws BoardNotFoundException {
+	public List<Column> getColumnsCopy(long boardID) throws BoardNotFoundException {
 		return getBoard(boardID).copy().getColumns();
 	}
 
@@ -86,7 +86,7 @@ public class DataManager {
 		throw new ColumnNotFoundException("No column found with title \"" + columnTitle + "\" in board " + boardID);
 	}
 
-	public Column getColumnClone(long boardID, String columnTitle) throws BoardNotFoundException, ColumnNotFoundException {
+	public Column getColumnCopy(long boardID, String columnTitle) throws BoardNotFoundException, ColumnNotFoundException {
 		List<Column> columns = getBoard(boardID).getColumns();
 		for (Column c: columns) {
 			if (c.getTitle().equals(columnTitle))
@@ -99,7 +99,7 @@ public class DataManager {
 		return getColumn(boardID, columnTitle).getTiles();
 	}
 
-	public List<Tile> getColumnTilesClone(long boardID, String columnTitle) throws BoardNotFoundException, ColumnNotFoundException {
+	public List<Tile> getColumnTilesCopy(long boardID, String columnTitle) throws BoardNotFoundException, ColumnNotFoundException {
 		return getColumn(boardID, columnTitle).copy().getTiles();
 	}
 
@@ -115,7 +115,7 @@ public class DataManager {
 		throw new TileNotFoundException("No tile found with id \"" + tileID + "\" in column \"" + columnTitle + "\" of \"" + boardID + "\" board");
 	}
 
-	public Tile getTileClone(long boardID, String columnTitle, long tileID) throws BoardNotFoundException, ColumnNotFoundException, TileNotFoundException {
+	public Tile getTileCopy(long boardID, String columnTitle, long tileID) throws BoardNotFoundException, ColumnNotFoundException, TileNotFoundException {
 		Column selectedColumn = getColumn(boardID, columnTitle);
 		List<Tile> tiles = selectedColumn.getTiles();
 
@@ -132,11 +132,11 @@ public class DataManager {
 
 		for (Column c: columns) {
 			if (c.getTitle().equals(columnTitle)) {
-				if (c.getState().equals(ColumnState.archived))
+				if (c.getState().equals(ColumnState.archived) && (editedColumn.getState() == null || editedColumn.getState().equals(ColumnState.archived)))
 					throw new InvalidRequestException("Cannot edit archived column");
-				if (c.getTitle() != null)
+				if (editedColumn.getTitle() != null)
 					c.setTitle(editedColumn.getTitle());
-				if (c.getState() != null)
+				if (editedColumn.getState() != null)
 					c.setState(editedColumn.getState());
 				syncStorage();
 				return;
