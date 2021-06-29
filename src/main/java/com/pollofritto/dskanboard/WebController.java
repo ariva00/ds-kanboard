@@ -26,7 +26,7 @@ public class WebController {
 	 * @param file
 	 * @return
 	 */
-	@PostMapping("/files/")
+	@PostMapping("/files/add/")
 	@ResponseBody
 	public ResponseEntity<String> uploadFile(@RequestParam("file") MultipartFile file) {
 		try {
@@ -35,6 +35,45 @@ public class WebController {
 			e.printStackTrace();
 			return new ResponseEntity<String>(HttpStatus.INTERNAL_SERVER_ERROR);
 		}
+	}
+	
+	@PostMapping("/images/add/")
+	@ResponseBody
+	public ResponseEntity<String> uploadImage(@RequestParam("file") MultipartFile file) {
+		try {
+			String uri = DsKanboardApplication.getFileStorageHandler().storeImage(file);
+			return new ResponseEntity<String>(uri, HttpStatus.CREATED);
+		} catch (IOException e) {
+			e.printStackTrace();
+			return new ResponseEntity<String>(HttpStatus.INTERNAL_SERVER_ERROR);
+		}
+	}
+	
+	@GetMapping("/images/{filename}")
+	@ResponseBody
+	public ResponseEntity<byte[]> getImage(@PathVariable("filename") String filename){
+		ResponseEntity<byte[]> response;
+		HttpHeaders header;
+		byte[] body;
+		
+		try {
+			body = DsKanboardApplication.getFileStorageHandler().getFile(filename);
+			
+			header = new HttpHeaders();
+			header.add("Content-Disposition", "attachment; filename=" + filename);
+			response = new ResponseEntity<byte[]>(body, header, HttpStatus.OK);
+			
+			
+		} catch (FileNotFoundException e) {
+			e.printStackTrace();
+			response = new ResponseEntity<byte[]>(HttpStatus.NOT_FOUND);
+		} catch (IOException e) {
+			e.printStackTrace();
+			response = new ResponseEntity<byte[]>(HttpStatus.INTERNAL_SERVER_ERROR);
+		}
+		
+		return response;
+		
 	}
 	
 	@GetMapping("/files/{filename}")

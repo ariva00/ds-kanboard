@@ -32,5 +32,9 @@ public abstract class FileStorageManager {
 	 * @return
 	 */
 	public abstract byte[] getFile(String uri) throws FileNotFoundException, IOException;
+
+	public abstract String storeImage(MultipartFile file) throws IOException;
+	
+	public abstract String storeImage(MultipartFile file, String fileName) throws IOException;
 	
 }

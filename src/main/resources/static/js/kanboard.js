@@ -477,7 +477,7 @@ class TileElement {
 
 		if(tile.imageURI != undefined){
 			var img = document.createElement("img");
-			img.setAttribute("src", "/files/" + tile.imageURI);
+			img.setAttribute("src", "/images/" + tile.imageURI);
 			img.classList.add("kanboard", "tile-content-image");
 			this.rootNode.appendChild(img);
 		}
@@ -987,7 +987,7 @@ class TileEditModal extends Modal{
 			case "text":
 				this.fileLabel.disabled = true;
 				this.fileInput.disabled = true;
-				this.textInput.style.display = "unset";
+				this.textInput.removeAttribute("style");
 				this.fileForm.style.display = "none";
 				this.textInput.disabled = false;
 				break;
@@ -996,7 +996,7 @@ class TileEditModal extends Modal{
 				this.fileInput.disabled = false;
 				this.textInput.disabled = true;
 				this.textInput.style.display = "none";
-				this.fileForm.style.display = "unset";
+				this.fileForm.removeAttribute("style");
 				this.fileURIInput.setAttribute("name", "imageURI");
 				break;
 			case "file":
@@ -1004,7 +1004,7 @@ class TileEditModal extends Modal{
 				this.fileInput.disabled = false;
 				this.textInput.disabled = true;
 				this.textInput.style.display = "none";
-				this.fileForm.style.display = "unset";
+				this.fileForm.removeAttribute("style");
 				this.fileURIInput.setAttribute("name", "fileURI");
 		}
 
@@ -1051,7 +1051,6 @@ class TileEditModal extends Modal{
 				break;
 			case "image":
 				if (this.fileInput.value == ""){
-					valid = false;
 					this.filename.firstChild.remove();
 					this.filename.append("select file")
 				} else {
@@ -1061,7 +1060,6 @@ class TileEditModal extends Modal{
 				break;
 			case "file":
 				if (this.fileInput.value == ""){
-					valid = false;
 					this.filename.firstChild.remove();
 					this.filename.append("select file");
 				} else {
@@ -1191,7 +1189,7 @@ class ServerConnector {
 			}
 		});
 
-		xhr.open("POST", this.uri + "/files/");
+		xhr.open("POST", this.uri + "/files/add/");
 
 		xhr.send(new FormData(fileForm));
 	}
@@ -1207,7 +1205,7 @@ class ServerConnector {
 			}
 		});
 
-		xhr.open("POST", this.uri + "/files/");
+		xhr.open("POST", this.uri + "/images/add/");
 
 		xhr.send(new FormData(fileForm));
 	}
@@ -1381,7 +1379,7 @@ class ServerConnector {
 				}
 			});
 
-			xhr.open("POST", this.uri + "/files/");
+			xhr.open("POST", this.uri + "/files/add/");
 
 			xhr.send(new FormData(fileForm));
 		}
@@ -1402,7 +1400,7 @@ class ServerConnector {
 				}
 			});
 
-			xhr.open("POST", this.uri + "/files/");
+			xhr.open("POST", this.uri + "/images/add/");
 
 			xhr.send(new FormData(fileForm));
 		}

@@ -162,8 +162,13 @@ public class DataManager {
 			selectedTile.setAuthor(editedTile.getAuthor());
 		if (editedTile.getColor() != null)
 			selectedTile.setColor(editedTile.getColor());
-
-		throw new TileNotFoundException("No tile found with id \"" + tileID + "\" in column \"" + columnTitle + "\" of \"" + boardID + "\" board");
+		
+		if (selectedTile instanceof TextTile && ((TextTile)editedTile).getText() != null)
+			((TextTile)selectedTile).setText(((TextTile)editedTile).getText());
+		else if (selectedTile instanceof ImageTile && ((ImageTile)editedTile).getImageURI() != null)
+			((ImageTile)selectedTile).setImageURI(((ImageTile)editedTile).getImageURI());
+		else if (selectedTile instanceof FileTile && ((FileTile)editedTile).getFileURI() != null)
+			((FileTile)selectedTile).setFileURI(((FileTile)editedTile).getFileURI());
 	}
 
 	public void addColumn(long boardID, Column column) throws BoardNotFoundException, InvalidRequestException {
