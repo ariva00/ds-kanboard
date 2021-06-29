@@ -38,7 +38,6 @@ class Kanboard {
 
 		this.updateBoards();
 
-		
 	}
 
 	updateBoard(){
@@ -123,9 +122,6 @@ class NavbarElement {
 			buttonsSpan.appendChild(archiveButton);
 		}
 		
-
-		
-
 		var newBoardButton = document.createElement("button");
 		newBoardButton.classList.add("kanboard", "button", "text-button");
 		newBoardButton.append("ADD BOARD");
@@ -538,8 +534,14 @@ class TileCreationModal extends Modal{
 
 	constructor(serverConnector, author){
 		super(serverConnector, author);
+
+		var modalContext = this;
+
 		this.form = document.createElement("form");
 		this.form.classList.add("kanboard", "form");
+		this.form.onchange = function(){
+			modalContext.validate();
+		}
 
 		this.titleInput = document.createElement("input");
 		this.titleInput.classList.add("kanboard", "input");
@@ -612,6 +614,9 @@ class TileCreationModal extends Modal{
 
 		this.fileForm = document.createElement("form");
 		this.fileForm.classList.add("kanboard", "form");
+		this.fileForm.onchange = function(){
+			modalContext.validate();
+		}
 
 		this.fileLabel = document.createElement("label");
 		this.fileLabel.classList.add("kanboard", "input");
@@ -631,7 +636,7 @@ class TileCreationModal extends Modal{
 
 		this.modalDiv.appendChild(this.fileForm);
 
-		var modalContext = this;
+		
 
 		var buttonsDiv = document.createElement("div");
 		buttonsDiv.classList.add("kanboard", "buttons-line");
@@ -654,28 +659,16 @@ class TileCreationModal extends Modal{
 	}
 
 	createTile(boardID, columnTitle){
+		this.boardID = boardID;
+		this.columnTitle = columnTitle;
 		this.titleInput.value = "";
 		this.textInput.value = "";
 		this.fileInput.value = "";
 		this.filename.firstChild.remove();
 		this.filename.append("select file");
 
-		var modalContext = this;
-		this.createButton.onclick = function(){
-			switch(modalContext.selectContent.value){
-				case "text":
-					modalContext.serverConnector.createTextTile(boardID, columnTitle, modalContext.form);
-					break;
-				case "image":
-					modalContext.serverConnector.createImageTile(boardID, columnTitle, modalContext.fileForm, modalContext.fileURIInput, modalContext.form);
-					break;
-				case "file":
-					modalContext.serverConnector.createFileTile(boardID, columnTitle, modalContext.fileForm, modalContext.fileURIInput, modalContext.form);
-			}
-			modalContext.hide();
-		}
-
 		this.show();
+		this.validate();
 
 		console.log("/api/" + boardID + "/" + columnTitle + "/tiles/add/");
 	}
@@ -685,14 +678,66 @@ class TileCreationModal extends Modal{
 		this.createButton.onclick = function(){
 			switch(modalContext.selectContent.value){
 				case "text":
-					modalContext.serverConnector.createTextTile(boardID, columnTitle, modalContext.form);
+					modalContext.serverConnector.createTextTile(modalContext.boardID, modalContext.columnTitle, modalContext.form);
 					break;
 				case "image":
-					modalContext.serverConnector.createImageTile(boardID, columnTitle, modalContext.fileForm, modalContext.fileURIInput, modalContext.form);
+					modalContext.serverConnector.createImageTile(modalContext.boardID, modalContext.columnTitle, modalContext.fileForm, modalContext.fileURIInput, modalContext.form);
 					break;
 				case "file":
-					modalContext.serverConnector.createFileTile(boardID, columnTitle, modalContext.fileForm, modalContext.fileURIInput, modalContext.form);
+					modalContext.serverConnector.createFileTile(modalContext.boardID, modalContext.columnTitle, modalContext.fileForm, modalContext.fileURIInput, modalContext.form);
 			}
+			modalContext.hide();
+		}
+		var valid = true;
+		if (this.titleInput.value == "") {
+			valid = false;
+		}
+		
+		switch (this.selectContent.value){
+			case "text":
+				this.fileLabel.disabled = true;
+				this.fileInput.disabled = true;
+				this.textInput.disabled = false;
+				if(this.textInput.value == ""){
+					valid = false;
+				}
+					
+				break;
+			case "image":
+				this.fileLabel.disabled = false;
+				this.fileInput.disabled = false;
+				this.textInput.disabled = true;
+				if (this.fileInput.value == ""){
+					valid = false;
+					this.filename.firstChild.remove();
+					this.filename.append("select file")
+				} else {
+					this.filename.firstChild.remove();
+					this.filename.append(this.fileInput.files[0].name);
+				}
+				this.fileURIInput.setAttribute("name", "imageURI");
+				break;
+			case "file":
+				this.fileLabel.disabled = false;
+				this.fileInput.disabled = false;
+				this.textInput.disabled = true;
+				if (this.fileInput.value == ""){
+					valid = false;
+					this.filename.firstChild.remove();
+					this.filename.append("select file");
+				} else {
+					this.filename.firstChild.remove();
+					this.filename.append(this.fileInput.files[0].name);
+				}
+				this.fileURIInput.setAttribute("name", "fileURI");
+		}
+		
+		if(valid){
+			this.createButton.disabled = false;
+			this.createButton.classList.remove("disabled");
+		} else {
+			this.createButton.disabled = true;
+			this.createButton.classList.add("disabled");
 		}
 	}
 
@@ -811,8 +856,235 @@ class BoardCreationModal extends Modal{
 
 class TileEditModal extends Modal{
 
+	constructor(serverConnector, author){
+		super(serverConnector, author);
+
+		var modalContext = this;
+
+		this.form = document.createElement("form");
+		this.form.classList.add("kanboard", "form");
+		this.form.onchange = function(){
+			modalContext.validate();
+		}
+
+		this.titleInput = document.createElement("input");
+		this.titleInput.classList.add("kanboard", "input");
+		this.titleInput.setAttribute("type", "text");
+		this.titleInput.setAttribute("placeholder", "title");
+		this.titleInput.setAttribute("name", "tileTitle");
+		this.form.appendChild(this.titleInput);
+
+		this.selectType = document.createElement("input");
+		this.selectType.setAttribute("type", "hidden");
+		this.selectType.setAttribute("name", "tileType");
+
+		this.form.appendChild(this.selectType);
+
+		this.selectContent = document.createElement("input");
+		this.selectContent.setAttribute("type", "hidden");
+		this.selectContent.setAttribute("name", "contentType");
+
+		this.form.appendChild(this.selectContent);
+
+		this.textInput = document.createElement("textarea");
+		this.textInput.classList.add("kanboard", "input");
+		this.textInput.setAttribute("placeholder", "text content");
+		this.textInput.setAttribute("name", "text");
+		this.form.appendChild(this.textInput);
+
+		this.colorInput = document.createElement("input");
+		this.colorInput.classList.add("kanboard", "input");
+		this.colorInput.setAttribute("type", "color");
+		this.colorInput.setAttribute("name", "color");
+		this.form.appendChild(this.colorInput);
+
+		this.fileURIInput = document.createElement("input");
+		this.fileURIInput.setAttribute("type", "hidden");
+		this.fileURIInput.setAttribute("name", "fileURI");
+		this.form.appendChild(this.fileURIInput);
+
+		this.authorInput = document.createElement("input");
+		this.authorInput.setAttribute("type", "hidden");
+		this.authorInput.setAttribute("name", "author");
+		this.authorInput.value = this.author;
+		this.form.appendChild(this.authorInput);
+
+		this.modalDiv.appendChild(this.form);
+
+		this.fileForm = document.createElement("form");
+		this.fileForm.classList.add("kanboard", "form");
+		this.fileForm.onchange = function(){
+			modalContext.validate();
+		}
+
+		this.fileLabel = document.createElement("label");
+		this.fileLabel.classList.add("kanboard", "input");
+
+		this.filename = document.createElement("span");
+		this.filename.append("select file");
+		this.fileLabel.appendChild(this.filename);
+
+		this.fileInput = document.createElement("input");
+		this.fileInput.classList.add("kanboard", "input");
+		this.fileInput.setAttribute("type", "file");
+		this.fileInput.setAttribute("name", "file");
+		this.fileInput.style.display = "none";
+		this.fileLabel.appendChild(this.fileInput);
+
+		this.fileForm.appendChild(this.fileLabel);
+
+		this.modalDiv.appendChild(this.fileForm);
+
+		
+
+		var buttonsDiv = document.createElement("div");
+		buttonsDiv.classList.add("kanboard", "buttons-line");
+		
+		this.createButton = document.createElement("button");
+		this.createButton.classList.add("kanboard", "button", "text-button");
+		this.createButton.append("SAVE");
+		buttonsDiv.append(this.createButton);
+
+		var cancelButton = document.createElement("button");
+		cancelButton.classList.add("kanboard", "button", "cancel-button");
+		cancelButton.append("CANCEL");
+		cancelButton.onclick = function(){
+			modalContext.hide();
+		}
+		buttonsDiv.append(cancelButton);
+
+		this.modalDiv.append(buttonsDiv);
+		
+	}
+
 	edit(boardID, columnTitle, tile){
+		this.boardID = boardID;
+		this.columnTitle = columnTitle;
+		this.tileID = tile.id;
+		this.titleInput.value = tile.title;
+		
+		this.textInput.value = "";
+
+		if(tile.text != undefined) {
+			this.selectContent.value = "text";
+			this.textInput.value = tile.text;
+		} else if (tile.imageURI != undefined) {
+			this.selectContent.value = "image";
+			this.fileURIInput.value = tile.imageURI;
+			this.fileInput.value = "";
+			this.filename.firstChild.remove();
+			this.filename.append("Select File");
+		} else if (tile.fileURI != undefined) {
+			this.selectContent.value = "file";
+			this.fileURIInput.value = tile.fileURI;
+			this.fileInput.value = "";
+			this.filename.firstChild.remove();
+			this.filename.append("Select File");
+		}
+
+		
+		switch (this.selectContent.value){
+			case "text":
+				this.fileLabel.disabled = true;
+				this.fileInput.disabled = true;
+				this.textInput.style.display = "unset";
+				this.fileForm.style.display = "none";
+				this.textInput.disabled = false;
+				break;
+			case "image":
+				this.fileLabel.disabled = false;
+				this.fileInput.disabled = false;
+				this.textInput.disabled = true;
+				this.textInput.style.display = "none";
+				this.fileForm.style.display = "unset";
+				this.fileURIInput.setAttribute("name", "imageURI");
+				break;
+			case "file":
+				this.fileLabel.disabled = false;
+				this.fileInput.disabled = false;
+				this.textInput.disabled = true;
+				this.textInput.style.display = "none";
+				this.fileForm.style.display = "unset";
+				this.fileURIInput.setAttribute("name", "fileURI");
+		}
+
+
+		this.selectType.value = tile.tileType;
+
+		
+
+		this.colorInput.value = tile.color;
+
+		var modalContext = this;
+		this.createButton.onclick = function(){
+			switch(modalContext.selectContent.value){
+				case "text":
+					modalContext.serverConnector.editTextTile(modalContext.boardID, modalContext.columnTitle, modalContext.tileID, modalContext.form);
+					break;
+				case "image":
+					modalContext.serverConnector.editImageTile(modalContext.boardID, modalContext.columnTitle, modalContext.tileID, modalContext.fileForm, modalContext.fileInput, modalContext.fileURIInput, modalContext.form);
+					break;
+				case "file":
+					modalContext.serverConnector.editFileTile(modalContext.boardID, modalContext.columnTitle, modalContext.tileID, modalContext.fileForm, modalContext.fileInput, modalContext.fileURIInput, modalContext.form);
+			}
+			modalContext.hide();
+		}
+
+		this.show();
+		this.validate();
+
 		console.log("/api/" + boardID + "/" + columnTitle + "/" + tile.id + "/edit/");
+	}
+
+	validate(){
+		
+		var valid = true;
+		if (this.titleInput.value == "") {
+			valid = false;
+		}
+		
+		switch (this.selectContent.value){
+			case "text":
+				if(this.textInput.value == ""){
+					valid = false;
+				}
+				break;
+			case "image":
+				if (this.fileInput.value == ""){
+					valid = false;
+					this.filename.firstChild.remove();
+					this.filename.append("select file")
+				} else {
+					this.filename.firstChild.remove();
+					this.filename.append(this.fileInput.files[0].name);
+				}
+				break;
+			case "file":
+				if (this.fileInput.value == ""){
+					valid = false;
+					this.filename.firstChild.remove();
+					this.filename.append("select file");
+				} else {
+					this.filename.firstChild.remove();
+					this.filename.append(this.fileInput.files[0].name);
+				}
+		}
+		
+		if(this.fileInput.value == ""){
+			this.filename.firstChild.remove();
+			this.filename.append("select file");
+		} else {
+			this.filename.firstChild.remove();
+			this.filename.append(this.fileInput.files[0].name);
+		}
+
+		if(valid){
+			this.createButton.disabled = false;
+			this.createButton.classList.remove("disabled");
+		} else {
+			this.createButton.disabled = true;
+			this.createButton.classList.add("disabled");
+		}
 	}
 
 }
@@ -915,7 +1187,6 @@ class ServerConnector {
 		xhr.addEventListener("readystatechange", function () {
 			if (this.readyState === 4) {
 				fileURIInput.value = this.responseText;
-				fileURIInput.setAttribute("name", "fileURI");
 				connectorContext.createTile(boardID, columnTitle, new FormData(dataForm));
 			}
 		});
@@ -932,7 +1203,6 @@ class ServerConnector {
 		xhr.addEventListener("readystatechange", function () {
 			if (this.readyState === 4) {
 				fileURIInput.value = this.responseText;
-				fileURIInput.setAttribute("name", "imageURI");
 				connectorContext.createTile(boardID, columnTitle, new FormData(dataForm));
 			}
 		});
@@ -1095,5 +1365,66 @@ class ServerConnector {
 		xhr.open("DELETE", this.uri + "/api/" + boardID + "/" + columnTitle + "/delete/");
 
 		xhr.send();
+	}
+
+	editFileTile(boardID, columnTitle, tileID, fileForm,  fileInput, fileURIInput, dataForm) {
+		if(fileInput.value == "" || fileInput.value == undefined){
+			this.editTile(boardID, columnTitle, tileID, new FormData(dataForm));
+		} else {
+			var xhr = new XMLHttpRequest();
+
+			var connectorContext = this;
+			xhr.addEventListener("readystatechange", function () {
+				if (this.readyState === 4) {
+					fileURIInput.value = this.responseText;
+					connectorContext.editTile(boardID, columnTitle, tileID, new FormData(dataForm));
+				}
+			});
+
+			xhr.open("POST", this.uri + "/files/");
+
+			xhr.send(new FormData(fileForm));
+		}
+	}
+
+	editImageTile(boardID, columnTitle, tileID, fileForm, fileInput, fileURIInput, dataForm) {
+		if(fileInput.value == "" || fileInput.value == undefined){
+			this.editTile(boardID, columnTitle, tileID, new FormData(dataForm));
+		} else {
+			var xhr = new XMLHttpRequest();
+
+			var connectorContext = this;
+			xhr.addEventListener("readystatechange", function () {
+				if (this.readyState === 4) {
+					fileURIInput.value = this.responseText;
+					console.log(this.response);
+					connectorContext.editTile(boardID, columnTitle, tileID, new FormData(dataForm));
+				}
+			});
+
+			xhr.open("POST", this.uri + "/files/");
+
+			xhr.send(new FormData(fileForm));
+		}
+		
+	}
+
+	editTextTile(boardID, columnTitle, tileID, dataForm) {
+		this.editTile(boardID, columnTitle, tileID, new FormData(dataForm));
+	}
+
+	editTile(boardID, columnTitle, tileID, data) {
+		var xhr = new XMLHttpRequest();
+
+		var connectorContext = this;
+		xhr.addEventListener("readystatechange", function () {
+			if (this.readyState === 4) {
+				connectorContext.getBoard(boardID);
+			}
+		});
+
+		xhr.open("PUT", this.uri + "/api/" + boardID + "/" + columnTitle + "/" + tileID + "/edit/");
+
+		xhr.send(data);
 	}
 }

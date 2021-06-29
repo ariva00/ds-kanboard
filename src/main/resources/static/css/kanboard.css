@@ -245,15 +245,17 @@
 
 .kanboard.input::placeholder{
 	color: var(--light-primary);
-	opacity: 1;
+	opacity: 0.5;
 }
 
 .kanboard.input::-ms-input-placeholder{
 	color: var(--light-primary);
+	opacity: 0.5;
 }
 
 .kanboard.input:-ms-input-placeholder{
 	color: var(--light-primary);
+	opacity: 0.5;
 }
 
 @media screen and (orientation : portrait) {
@@ -315,4 +317,8 @@
 	height: 0.5em;  
 	border-top-left-radius: 0.5rem; 
 	border-top-right-radius: 0.5rem;
+}
+
+.kanboard.button.kanboard.text-button.disabled {
+	background-color: var(--secondary-color-desat);
 }
