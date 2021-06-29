@@ -44,7 +44,11 @@
 	--cancel-button-text-color : red;
 	--cancel-button-background-hover : rgba(255, 0, 0, 0.1);
 	--cancel-button-text-color-hover : red;
-	
+
+	--delete-button-background : rgba(0, 0, 0, 0);
+	--delete-button-text-color : var(--primary-color-desat);
+	--delete-button-background-hover : rgba(255, 0, 0, 0.1);
+	--delete-button-text-color-hover : red;
 
 	--shadow-color : rgba(0, 0, 0, 0.5);
 
@@ -173,6 +177,13 @@
 	background-color: var(--cancel-button-background);
 }
 
+.kanboard.delete-button{
+	cursor: pointer;
+	border-radius: 0.5rem;
+	color: var(--delete-button-text-color);
+	background-color: var(--delete-button-background);
+}
+
 .kanboard.unboxed-button{
 	cursor: pointer;
 	border-radius: 0.5rem;
@@ -265,6 +276,11 @@
 .kanboard.cancel-button:hover{
 	color: var(--cancel-button-text-color-hover);
 	background-color: var(--cancel-button-background-hover);
+}
+
+.kanboard.delete-button:hover{
+	color: var(--delete-button-text-color-hover);
+	background-color: var(--delete-button-background-hover);
 }
 
 .kanboard.input:focus{

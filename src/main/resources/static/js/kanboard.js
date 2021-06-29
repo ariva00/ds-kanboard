@@ -166,19 +166,29 @@ class BoardElement {
 	constructor(board, tileEditModal, columnEditModal, tileCreationModal, columnCreationModal, serverConnector, state) {
 		this.rootNode = document.createElement("div");
 		this.rootNode.classList.add("kanboard", "board");
-		for (var index in board.columns) {
-			if(board.columns[index].state == state){
 
+		var columns = new Array();
+		for (var col of board.columns) {
+			if (col.state == state)
+				columns.push(col);
+		}
+
+		for (var index in columns) {
+			if(columns[index].state == state){
 				var prevTitle = undefined;
 				var succTitle = undefined;
 
-				if(board.columns[+index - 1] != undefined)
-					prevTitle = board.columns[+index - 1].title;
-			
-				if(board.columns[+index + 1] != undefined)
-					succTitle = board.columns[+index + 1].title;
 
-				var column = new ColumnElement(board.id, board.columns[index], tileEditModal, columnEditModal, tileCreationModal, serverConnector, prevTitle, succTitle);
+				if(state == "active"){
+					if(columns[+index - 1] != undefined)
+						prevTitle = board.columns[+index - 1].title;
+			
+					if(columns[+index + 1] != undefined)
+						succTitle = columns[+index + 1].title;
+				}
+				
+
+				var column = new ColumnElement(board.id, columns[index], tileEditModal, columnEditModal, tileCreationModal, serverConnector, prevTitle, succTitle);
 
 				this.rootNode.appendChild(column.getNodeTree());
 			}
@@ -238,13 +248,16 @@ class ColumnElement {
 			var prevTileID = undefined;
 			var succTileID = undefined;
 
-			if(column.tiles[+index - 1] != undefined)
-				prevTileID = column.tiles[+index - 1].id;
+			if(column.state == "active"){
+				if(column.tiles[+index - 1] != undefined)
+					prevTileID = column.tiles[+index - 1].id;
+				
+				if(column.tiles[+index + 1] != undefined)
+					succTileID = column.tiles[+index + 1].id;
+			}
 			
-			if(column.tiles[+index + 1] != undefined)
-				succTileID = column.tiles[+index + 1].id;
 
-			var tile = new TileElement(boardID, column.title, column.tiles[index], tileEditModal, serverConnector, prevTileID, succTileID);
+			var tile = new TileElement(boardID, column.title, column.tiles[index], tileEditModal, serverConnector, column.state, prevTileID, succTileID);
 			this.rootNode.appendChild(tile.getNodeTree());
 		}
 
@@ -310,7 +323,7 @@ class ColumnHeaderElement {
 			buttonsSpan.appendChild(editButton);
 
 			var deleteButton = document.createElement("span");
-			deleteButton.classList.add("material-icons-outlined", "kanboard", "unboxed-button")
+			deleteButton.classList.add("material-icons-outlined", "kanboard", "delete-button");
 			deleteButton.append("delete");
 			deleteButton.onclick = function() {
 				serverConnector.deleteColumn(boardID, column.title);
@@ -375,7 +388,7 @@ class TileCreationElement {
 }
 
 class TileElement {
-	constructor(boardID, columnTitle, tile, tileEditModal, serverConnector, prevID, succID){
+	constructor(boardID, columnTitle, tile, tileEditModal, serverConnector, state, prevID, succID){
 		this.tile = tile;
 		this.rootNode = document.createElement("div");
 		this.rootNode.classList.add("kanboard", "tile");
@@ -390,7 +403,7 @@ class TileElement {
 		tileHeader.classList.add("kanboard", "buttons-line");
 		
 		var tileTitle = document.createElement("p");
-		if(tile.tileType = "Informative")
+		if(tile.tileType == "Informative")
 			tileTitle.classList.add("kanboard", "tile-title", "tile-informative");
 		else
 			tileTitle.classList.add("kanboard", "tile-title", "tile-organizational");
@@ -400,23 +413,24 @@ class TileElement {
 		
 		var tileEditDeleteDiv = document.createElement("div");
 
-		
-		var editButton = document.createElement("span");
-		editButton.append("edit");
-		editButton.classList.add("material-icons-outlined", "kanboard", "unboxed-button");
-		editButton.onclick = function(){
-			tileEditModal.edit(boardID, columnTitle, tile);
-		};
-		tileEditDeleteDiv.appendChild(editButton);
-
-		
-		var deleteButton = document.createElement("span");
-		deleteButton.append("delete")
-		deleteButton.classList.add("material-icons-outlined", "kanboard", "unboxed-button");
-		deleteButton.onclick = function(){
-			serverConnector.deleteTile(boardID, columnTitle, tile.id);
+		if(state == "active"){
+			var editButton = document.createElement("span");
+			editButton.append("edit");
+			editButton.classList.add("material-icons-outlined", "kanboard", "unboxed-button");
+			editButton.onclick = function(){
+				tileEditModal.edit(boardID, columnTitle, tile);
+			};
+			tileEditDeleteDiv.appendChild(editButton);
+			
+			var deleteButton = document.createElement("span");
+			deleteButton.append("delete")
+			deleteButton.classList.add("material-icons-outlined", "kanboard", "delete-button");
+			deleteButton.onclick = function(){
+				serverConnector.deleteTile(boardID, columnTitle, tile.id);
+			}
+			tileEditDeleteDiv.appendChild(deleteButton);
 		}
-		tileEditDeleteDiv.appendChild(deleteButton);
+		
 
 		tileHeader.appendChild(tileEditDeleteDiv);
 		this.rootNode.appendChild(tileHeader);
@@ -658,6 +672,7 @@ class TileCreationModal extends Modal{
 				case "file":
 					modalContext.serverConnector.createFileTile(boardID, columnTitle, modalContext.fileForm, modalContext.fileURIInput, modalContext.form);
 			}
+			modalContext.hide();
 		}
 
 		this.show();
