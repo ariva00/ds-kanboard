@@ -50,7 +50,7 @@ class Kanboard {
 	}
 
 	updateBoards(){
-		this.serverConnector.getBoards();
+		this.serverConnector.getBoardsHeaders();
 	}
 
 	updateNavbar(){
@@ -82,41 +82,49 @@ class NavbarElement {
 		var buttonsSpan = document.createElement("span");
 		buttonsSpan.style.display = "flex";
 
-		var select = document.createElement("select");
-		select.classList.add("kanboard", "input");
+		
+		
 
-		for(var board of boards){
-			console.log(board);
-			var option = document.createElement("option");
-			option.setAttribute("value", board.boardID);
-			option.append(board.title); 
-			select.appendChild(option);
-		}
-
-		select.onchange = function(){
+		if(boards != undefined && boards.length > 0){
+			var select = document.createElement("select");
+			select.classList.add("kanboard", "input");
+			for(var board of boards){
+				console.log(board);
+				var option = document.createElement("option");
+				option.setAttribute("value", board.id);
+				option.append(board.title); 
+				select.appendChild(option);
+			}
+	
+			select.onchange = function(){
+				serverConnector.getBoard(select.value);
+			}
+	
+			buttonsSpan.appendChild(select);
 			serverConnector.getBoard(select.value);
-		}
 
-		buttonsSpan.appendChild(select);
-
-		var archiveButton = document.createElement("button");
-		archiveButton.classList.add("kanboard", "button", "text-button");
-		archiveButton.append("SHOW ARCHIVED");
-		archiveButton.onclick = function(){
-			if(kanboard.getState() == "archived"){
-				kanboard.setState("active");
-				archiveButton.removeChild(archiveButton.firstChild);
-				archiveButton.append("SHOW ARCHIVED");
+			var archiveButton = document.createElement("button");
+			archiveButton.classList.add("kanboard", "button", "text-button");
+			archiveButton.append("SHOW ARCHIVED");
+			archiveButton.onclick = function(){
+				if(kanboard.getState() == "archived"){
+					kanboard.setState("active");
+					archiveButton.removeChild(archiveButton.firstChild);
+					archiveButton.append("SHOW ARCHIVED");
+				}
+					
+				else if(kanboard.getState() == "active"){
+					kanboard.setState("archived");
+					archiveButton.removeChild(archiveButton.firstChild);
+					archiveButton.append("SHOW ACTIVE");
+				}
+					
 			}
-				
-			else if(kanboard.getState() == "active"){
-				kanboard.setState("archived");
-				archiveButton.removeChild(archiveButton.firstChild);
-				archiveButton.append("SHOW ACTIVE");
-			}
-				
+			buttonsSpan.appendChild(archiveButton);
 		}
-		buttonsSpan.appendChild(archiveButton);
+		
+
+		
 
 		var newBoardButton = document.createElement("button");
 		newBoardButton.classList.add("kanboard", "button", "text-button");
@@ -145,7 +153,7 @@ class NavbarElement {
 
 		this.rootNode.append(loginButton);
 
-		serverConnector.getBoard(select.value);
+		
 	}
 
 	getNodeTree(){
@@ -164,21 +172,23 @@ class BoardElement {
 				var prevTitle = undefined;
 				var succTitle = undefined;
 
-				if(board.columns[index - 1] != undefined)
-					prevTitle = board.columns[index - 1].title;
+				if(board.columns[+index - 1] != undefined)
+					prevTitle = board.columns[+index - 1].title;
 			
-				if(board.columns[index + 1] != undefined)
-					succTitle = board.columns[index + 1].title;
+				if(board.columns[+index + 1] != undefined)
+					succTitle = board.columns[+index + 1].title;
 
-				var column = new ColumnElement(board.boardID, board.columns[index], tileEditModal, columnEditModal, tileCreationModal, serverConnector, prevTitle, succTitle);
+				var column = new ColumnElement(board.id, board.columns[index], tileEditModal, columnEditModal, tileCreationModal, serverConnector, prevTitle, succTitle);
 
 				this.rootNode.appendChild(column.getNodeTree());
 			}
 		}
 
-		var columnCreationElement = new ColumnCreationElement (board.boardID, columnCreationModal);
-
-		this.rootNode.appendChild(columnCreationElement.getNodeTree());
+		if(state == "active"){
+			var columnCreationElement = new ColumnCreationElement (board.id, columnCreationModal);
+			this.rootNode.appendChild(columnCreationElement.getNodeTree());
+		}
+		
 	}
 
 	getNodeTree(){
@@ -228,18 +238,21 @@ class ColumnElement {
 			var prevTileID = undefined;
 			var succTileID = undefined;
 
-			if(column.tiles[index - 1] != undefined)
-				prevTileID = column.tiles[index - 1].id;
+			if(column.tiles[+index - 1] != undefined)
+				prevTileID = column.tiles[+index - 1].id;
 			
-			if(column.tiles[index + 1] != undefined)
-				succTileID = column.tiles[index + 1].id;
+			if(column.tiles[+index + 1] != undefined)
+				succTileID = column.tiles[+index + 1].id;
 
 			var tile = new TileElement(boardID, column.title, column.tiles[index], tileEditModal, serverConnector, prevTileID, succTileID);
 			this.rootNode.appendChild(tile.getNodeTree());
 		}
 
-		var tileCreationElement = new TileCreationElement(boardID, column.title, tileCreationModal);
-		this.rootNode.appendChild(tileCreationElement.getNodeTree());
+		if(column.state == "active"){
+			var tileCreationElement = new TileCreationElement(boardID, column.title, tileCreationModal);
+			this.rootNode.appendChild(tileCreationElement.getNodeTree());
+		}
+		
 	}
 
 	getNodeTree(){
@@ -260,7 +273,7 @@ class ColumnHeaderElement {
 		this.rootNode.appendChild(colorDiv);
 
 		var tileHeader = document.createElement("div");
-		tileHeader.classList.add("kanboard", "tile-header");
+		tileHeader.classList.add("kanboard", "buttons-line");
 
 		var tileTitle = document.createElement("p");
 		tileTitle.classList.add("kanboard", "column-title");
@@ -270,27 +283,43 @@ class ColumnHeaderElement {
 		var buttonsSpan = document.createElement("span");
 		var archiveButton = document.createElement("span");
 		archiveButton.classList.add("material-icons-outlined", "kanboard", "unboxed-button")
-		archiveButton.append("archive");
-		archiveButton.onclick = function() {
-			serverConnector.archiveColumn(boardID, column.title);
+
+		if(column.state == "active"){
+			archiveButton.append("archive");
+			archiveButton.onclick = function() {
+				serverConnector.archiveColumn(boardID, column.title);
+			}
 		}
+
+		if(column.state == "archived"){
+			archiveButton.append("unarchive");
+			archiveButton.onclick = function() {
+				serverConnector.archiveColumn(boardID, column.title, false);
+			}
+		}
+
 		buttonsSpan.appendChild(archiveButton);
 
-		var editButton = document.createElement("span");
-		editButton.classList.add("material-icons-outlined", "kanboard", "unboxed-button")
-		editButton.append("edit");
-		editButton.onclick = function() {
-			columnEditModal.edit(boardID, column.title);
-		}
-		buttonsSpan.appendChild(editButton);
+		if(column.state == "active"){
+			var editButton = document.createElement("span");
+			editButton.classList.add("material-icons-outlined", "kanboard", "unboxed-button")
+			editButton.append("edit");
+			editButton.onclick = function() {
+				columnEditModal.edit(boardID, column.title);
+			}
+			buttonsSpan.appendChild(editButton);
 
-		var deleteButton = document.createElement("span");
-		deleteButton.classList.add("material-icons-outlined", "kanboard", "unboxed-button")
-		deleteButton.append("delete");
-		deleteButton.onclick = function() {
-			serverConnector.deleteColumn(boardID, column.title);
+			var deleteButton = document.createElement("span");
+			deleteButton.classList.add("material-icons-outlined", "kanboard", "unboxed-button")
+			deleteButton.append("delete");
+			deleteButton.onclick = function() {
+				serverConnector.deleteColumn(boardID, column.title);
+			}
+			buttonsSpan.appendChild(deleteButton);
 		}
-		buttonsSpan.appendChild(deleteButton);
+		
+
+		
 
 		tileHeader.appendChild(buttonsSpan);
 
@@ -356,10 +385,10 @@ class TileElement {
 		colorDiv.style.backgroundColor = tile.color;
 		this.rootNode.appendChild(colorDiv);
 
-		//header
+		
 		var tileHeader = document.createElement("div");
-		tileHeader.classList.add("kanboard", "tile-header");
-			//title
+		tileHeader.classList.add("kanboard", "buttons-line");
+		
 		var tileTitle = document.createElement("p");
 		if(tile.tileType = "Informative")
 			tileTitle.classList.add("kanboard", "tile-title", "tile-informative");
@@ -368,10 +397,10 @@ class TileElement {
 		tileTitle.append(tile.title);
 		tileHeader.appendChild(tileTitle);
 
-			//edit-delete-div
+		
 		var tileEditDeleteDiv = document.createElement("div");
 
-				//edit
+		
 		var editButton = document.createElement("span");
 		editButton.append("edit");
 		editButton.classList.add("material-icons-outlined", "kanboard", "unboxed-button");
@@ -380,7 +409,7 @@ class TileElement {
 		};
 		tileEditDeleteDiv.appendChild(editButton);
 
-				//delete
+		
 		var deleteButton = document.createElement("span");
 		deleteButton.append("delete")
 		deleteButton.classList.add("material-icons-outlined", "kanboard", "unboxed-button");
@@ -392,12 +421,12 @@ class TileElement {
 		tileHeader.appendChild(tileEditDeleteDiv);
 		this.rootNode.appendChild(tileHeader);
 
-		//header
+		
 		tileHeader = document.createElement("div");
-		tileHeader.classList.add("kanboard", "tile-header");
-			//up-down-div
+		tileHeader.classList.add("kanboard", "buttons-line");
+		
 		var tileUpDownDiv = document.createElement("div");
-				//up
+		
 		if(prevID != undefined){
 			var upButton = document.createElement("span");
 			upButton.append("arrow_upward");
@@ -407,7 +436,7 @@ class TileElement {
 			}
 			tileUpDownDiv.appendChild(upButton);
 		}
-				//down
+		
 		if(succID != undefined){
 			var downButton = document.createElement("span");
 			downButton.append("arrow_downward");
@@ -420,7 +449,7 @@ class TileElement {
 
 		tileHeader.appendChild(tileUpDownDiv);
 
-			//author
+		
 		var tileAuthor = document.createElement("p");
 		if(tile.tileType = "Informative")
 			tileAuthor.classList.add("kanboard", "tile-author");
@@ -438,7 +467,7 @@ class TileElement {
 
 		if(tile.imageURI != undefined){
 			var img = document.createElement("img");
-			img.setAttribute("src", "tile.imageURL");
+			img.setAttribute("src", "/files/" + tile.imageURI);
 			img.classList.add("kanboard", "tile-content-image");
 			this.rootNode.appendChild(img);
 		}
@@ -493,24 +522,274 @@ class Modal {
 
 class TileCreationModal extends Modal{
 
+	constructor(serverConnector, author){
+		super(serverConnector, author);
+		this.form = document.createElement("form");
+		this.form.classList.add("kanboard", "form");
+
+		this.titleInput = document.createElement("input");
+		this.titleInput.classList.add("kanboard", "input");
+		this.titleInput.setAttribute("type", "text");
+		this.titleInput.setAttribute("placeholder", "title");
+		this.titleInput.setAttribute("name", "tileTitle");
+		this.form.appendChild(this.titleInput);
+
+		this.selectType = document.createElement("select");
+		this.selectType.classList.add("kanboard", "input");
+		this.selectType.setAttribute("name", "tileType");
+
+		var option = document.createElement("option");
+		option.setAttribute("value", "Informative");
+		option.append("Informative");
+		this.selectType.appendChild(option);
+
+		var option = document.createElement("option");
+		option.setAttribute("value", "Organizational");
+		option.append("Organizational"); 
+		this.selectType.appendChild(option);
+
+		this.form.appendChild(this.selectType);
+
+		this.selectContent = document.createElement("select");
+		this.selectContent.classList.add("kanboard", "input");
+		this.selectContent.setAttribute("name", "contentType");
+
+		var option = document.createElement("option");
+		option.setAttribute("value", "text");
+		option.append("Text");
+		this.selectContent.appendChild(option);
+
+		var option = document.createElement("option");
+		option.setAttribute("value", "image");
+		option.append("Image"); 
+		this.selectContent.appendChild(option);
+
+		var option = document.createElement("option");
+		option.setAttribute("value", "file");
+		option.append("File"); 
+		this.selectContent.appendChild(option);
+
+		this.form.appendChild(this.selectContent);
+
+		this.textInput = document.createElement("textarea");
+		this.textInput.classList.add("kanboard", "input");
+		this.textInput.setAttribute("placeholder", "text content");
+		this.textInput.setAttribute("name", "text");
+		this.form.appendChild(this.textInput);
+
+		this.colorInput = document.createElement("input");
+		this.colorInput.classList.add("kanboard", "input");
+		this.colorInput.setAttribute("type", "color");
+		this.colorInput.setAttribute("name", "color");
+		this.form.appendChild(this.colorInput);
+
+		this.fileURIInput = document.createElement("input");
+		this.fileURIInput.setAttribute("type", "hidden");
+		this.fileURIInput.setAttribute("name", "fileURI");
+		this.form.appendChild(this.fileURIInput);
+
+		this.authorInput = document.createElement("input");
+		this.authorInput.setAttribute("type", "hidden");
+		this.authorInput.setAttribute("name", "author");
+		this.authorInput.value = this.author;
+		this.form.appendChild(this.authorInput);
+
+		this.modalDiv.appendChild(this.form);
+
+		this.fileForm = document.createElement("form");
+		this.fileForm.classList.add("kanboard", "form");
+
+		this.fileLabel = document.createElement("label");
+		this.fileLabel.classList.add("kanboard", "input");
+
+		this.filename = document.createElement("span");
+		this.filename.append("select file");
+		this.fileLabel.appendChild(this.filename);
+
+		this.fileInput = document.createElement("input");
+		this.fileInput.classList.add("kanboard", "input");
+		this.fileInput.setAttribute("type", "file");
+		this.fileInput.setAttribute("name", "file");
+		this.fileInput.style.display = "none";
+		this.fileLabel.appendChild(this.fileInput);
+
+		this.fileForm.appendChild(this.fileLabel);
+
+		this.modalDiv.appendChild(this.fileForm);
+
+		var modalContext = this;
+
+		var buttonsDiv = document.createElement("div");
+		buttonsDiv.classList.add("kanboard", "buttons-line");
+		
+		this.createButton = document.createElement("button");
+		this.createButton.classList.add("kanboard", "button", "text-button");
+		this.createButton.append("CREATE");
+		buttonsDiv.append(this.createButton);
+
+		var cancelButton = document.createElement("button");
+		cancelButton.classList.add("kanboard", "button", "cancel-button");
+		cancelButton.append("CANCEL");
+		cancelButton.onclick = function(){
+			modalContext.hide();
+		}
+		buttonsDiv.append(cancelButton);
+
+		this.modalDiv.append(buttonsDiv);
+		
+	}
+
 	createTile(boardID, columnTitle){
+		this.titleInput.value = "";
+		this.textInput.value = "";
+		this.fileInput.value = "";
+		this.filename.firstChild.remove();
+		this.filename.append("select file");
+
+		var modalContext = this;
+		this.createButton.onclick = function(){
+			switch(modalContext.selectContent.value){
+				case "text":
+					modalContext.serverConnector.createTextTile(boardID, columnTitle, modalContext.form);
+					break;
+				case "image":
+					modalContext.serverConnector.createImageTile(boardID, columnTitle, modalContext.fileForm, modalContext.fileURIInput, modalContext.form);
+					break;
+				case "file":
+					modalContext.serverConnector.createFileTile(boardID, columnTitle, modalContext.fileForm, modalContext.fileURIInput, modalContext.form);
+			}
+		}
+
+		this.show();
+
 		console.log("/api/" + boardID + "/" + columnTitle + "/tiles/add/");
+	}
+
+	validate(){
+		var modalContext = this;
+		this.createButton.onclick = function(){
+			switch(modalContext.selectContent.value){
+				case "text":
+					modalContext.serverConnector.createTextTile(boardID, columnTitle, modalContext.form);
+					break;
+				case "image":
+					modalContext.serverConnector.createImageTile(boardID, columnTitle, modalContext.fileForm, modalContext.fileURIInput, modalContext.form);
+					break;
+				case "file":
+					modalContext.serverConnector.createFileTile(boardID, columnTitle, modalContext.fileForm, modalContext.fileURIInput, modalContext.form);
+			}
+		}
 	}
 
 }
 
 class ColumnCreationModal extends Modal{
+
+	constructor(serverConnector){
+		super(serverConnector);
+		this.form = document.createElement("form");
+		this.form.classList.add("kanboard", "form");
+
+		this.titleInput = document.createElement("input");
+		this.titleInput.classList.add("kanboard", "input");
+		this.titleInput.setAttribute("type", "text");
+		this.titleInput.setAttribute("placeholder", "title");
+		this.titleInput.setAttribute("name", "columnTitle");
+		this.form.appendChild(this.titleInput);
+
+		this.colorInput = document.createElement("input");
+		this.colorInput.classList.add("kanboard", "input");
+		this.colorInput.setAttribute("type", "color");
+		this.colorInput.setAttribute("name", "color");
+		this.form.appendChild(this.colorInput);
+
+		this.modalDiv.appendChild(this.form);
+
+		var modalContext = this;
+
+		var buttonsDiv = document.createElement("div");
+		buttonsDiv.classList.add("kanboard", "buttons-line");
+		
+		this.createButton = document.createElement("button");
+		this.createButton.classList.add("kanboard", "button", "text-button");
+		this.createButton.append("CREATE");
+		buttonsDiv.append(this.createButton);
+
+		var cancelButton = document.createElement("button");
+		cancelButton.classList.add("kanboard", "button", "cancel-button");
+		cancelButton.append("CANCEL");
+		cancelButton.onclick = function(){
+			modalContext.hide();
+		}
+		buttonsDiv.append(cancelButton);
+
+		this.modalDiv.append(buttonsDiv);
+		
+	}
 	
 	createColumn(boardID){
-		console.log("/api/" + boardID + "/columns/add/")
+		console.log("/api/" + boardID + "/columns/add/");
+		this.titleInput.value = "";
+		this.colorInput.value = "#f00";
+
+		var modalContext = this;
+		this.createButton.onclick = function(){
+			modalContext.serverConnector.createColumn(boardID, new FormData(modalContext.form));
+			modalContext.hide();
+		}
+		this.show();
+
+		
 	}
 
 }
 
 class BoardCreationModal extends Modal{
+
+	constructor(serverConnector){
+		super(serverConnector);
+		this.form = document.createElement("form");
+		this.form.classList.add("kanboard", "form");
+
+		this.titleInput = document.createElement("input");
+		this.titleInput.classList.add("kanboard", "input");
+		this.titleInput.setAttribute("type", "text");
+		this.titleInput.setAttribute("placeholder", "title");
+		this.titleInput.setAttribute("name", "boardTitle");
+		this.form.appendChild(this.titleInput);
+
+		this.modalDiv.appendChild(this.form);
+
+		var modalContext = this;
+
+		var buttonsDiv = document.createElement("div");
+		buttonsDiv.classList.add("kanboard", "buttons-line");
+		
+		this.createButton = document.createElement("button");
+		this.createButton.classList.add("kanboard", "button", "text-button");
+		this.createButton.append("CREATE");
+		this.createButton.onclick = function(){
+			modalContext.serverConnector.createBoard(new FormData(modalContext.form));
+			modalContext.hide();
+		}
+		buttonsDiv.append(this.createButton);
+
+		var cancelButton = document.createElement("button");
+		cancelButton.classList.add("kanboard", "button", "cancel-button");
+		cancelButton.append("CANCEL");
+		cancelButton.onclick = function(){
+			modalContext.hide();
+		}
+		buttonsDiv.append(cancelButton);
+
+		this.modalDiv.append(buttonsDiv);
+		
+	}
 	
 	createBoard(){
-		console.log("/api/" + boardID + "/columns/add/")
+		console.log("/api/boards/add/");
+		this.titleInput.value = "";
+		this.show();
 	}
 
 }
@@ -525,8 +804,8 @@ class TileEditModal extends Modal{
 
 class ColumnEditModal extends Modal{
 
-	edit(boardID, column){
-		console.log("/api/" + boardID + "/" + column.title + "/edit/");
+	edit(boardID, columnTitle){
+		console.log("/api/" + boardID + "/" + columnTitle + "/edit/");
 	}
 
 }
@@ -534,7 +813,7 @@ class ColumnEditModal extends Modal{
 class LoginModal extends Modal{
 
 	constructor(kanboard){
-		super(null, null);
+		super();
 		var form = document.createElement("form");
 		form.classList.add("kanboard", "form");
 		
@@ -563,10 +842,10 @@ class LoginModal extends Modal{
 			}
 		}
 
-		var loginContext = this;
+		var modalContext = this;
 		button.onclick = function(){
 			kanboard.init(usernameInput.value);
-			loginContext.hide();
+			modalContext.hide();
 		}
 	}
 
@@ -582,6 +861,89 @@ class ServerConnector {
 	constructor(uri, kanboard) {
 		this.uri = uri;
 		this.kanboard = kanboard;
+	}
+
+	createBoard(data){
+		var xhr = new XMLHttpRequest();
+
+		var connectorContext = this;
+		xhr.addEventListener("readystatechange", function () {
+			if (this.readyState === 4) {
+				connectorContext.getBoards()
+			}
+		});
+
+		xhr.open("POST", this.uri + "/api/boards/add/");
+
+		xhr.send(data);
+	}
+
+	createColumn(boardID, data){
+		var xhr = new XMLHttpRequest();
+
+		var connectorContext = this;
+		xhr.addEventListener("readystatechange", function () {
+			if (this.readyState === 4) {
+				connectorContext.getBoard(boardID);
+			}
+		});
+
+		xhr.open("POST", this.uri + "/api/" + boardID + "/columns/add/");
+
+		xhr.send(data);
+	}
+
+	createFileTile(boardID, columnTitle, fileForm, fileURIInput, dataForm) {
+		var xhr = new XMLHttpRequest();
+
+		var connectorContext = this;
+		xhr.addEventListener("readystatechange", function () {
+			if (this.readyState === 4) {
+				fileURIInput.value = this.responseText;
+				fileURIInput.setAttribute("name", "fileURI");
+				connectorContext.createTile(boardID, columnTitle, new FormData(dataForm));
+			}
+		});
+
+		xhr.open("POST", this.uri + "/files/");
+
+		xhr.send(new FormData(fileForm));
+	}
+
+	createImageTile(boardID, columnTitle, fileForm, fileURIInput, dataForm) {
+		var xhr = new XMLHttpRequest();
+
+		var connectorContext = this;
+		xhr.addEventListener("readystatechange", function () {
+			if (this.readyState === 4) {
+				fileURIInput.value = this.responseText;
+				fileURIInput.setAttribute("name", "imageURI");
+				connectorContext.createTile(boardID, columnTitle, new FormData(dataForm));
+			}
+		});
+
+		xhr.open("POST", this.uri + "/files/");
+
+		xhr.send(new FormData(fileForm));
+	}
+
+	createTextTile(boardID, columnTitle, dataForm) {
+		this.createTile(boardID, columnTitle, new FormData(dataForm));
+	}
+
+	createTile(boardID, columnTitle, data) {
+		var xhr = new XMLHttpRequest();
+
+		var connectorContext = this;
+		xhr.addEventListener("readystatechange", function () {
+			if (this.readyState === 4) {
+				connectorContext.getBoard(boardID);
+			}
+		});
+
+		xhr.open("POST", this.uri + "/api/" + boardID + "/" + columnTitle + "/tiles/add/");
+
+		xhr.send(data);
 	}
 
 	getBoard(boardID) {
@@ -616,13 +978,29 @@ class ServerConnector {
 		xhr.send();
 	}
 
+	getBoardsHeaders() {
+		var xhr = new XMLHttpRequest();
+
+		var connectorContext = this;
+		xhr.addEventListener("readystatechange", function () {
+			if (this.readyState === 4) {
+				connectorContext.kanboard.boards = JSON.parse(this.response);
+				connectorContext.kanboard.updateNavbar();
+			}
+		});
+
+		xhr.open("GET", this.uri + "/api/boards/headers/");
+
+		xhr.send();
+	}
+
 	deleteTile(boardID, columnTitle, tileID){
 		var xhr = new XMLHttpRequest();
 
 		var connectorContext = this;
 		xhr.addEventListener("readystatechange", function () {
 			if (this.readyState === 4) {
-				connectorContext.getBoard(connectorContext.kanboard.board.boardID);
+				connectorContext.getBoard(connectorContext.kanboard.board.id);
 			}
 		});
 
@@ -637,11 +1015,11 @@ class ServerConnector {
 		var connectorContext = this;
 		xhr.addEventListener("readystatechange", function() {
 		if(this.readyState === 4) {
-			connectorContext.getBoard(connectorContext.kanboard.board.boardID);
+			connectorContext.getBoard(connectorContext.kanboard.board.id);
 		}
 		});
 
-		xhr.open("PUT", this.uri + "/api/" + boardID + "/" + columnTitle + "/swap/");
+		xhr.open("PUT", this.uri + "/api/" + boardID + "/" + columnTitle + "/tiles/swap/");
 		
 		xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
 
@@ -654,7 +1032,7 @@ class ServerConnector {
 		var connectorContext = this;
 		xhr.addEventListener("readystatechange", function() {
 		if(this.readyState === 4) {
-			connectorContext.getBoard(connectorContext.kanboard.board.boardID)
+			connectorContext.getBoard(connectorContext.kanboard.board.id)
 		}
 		});
 
@@ -678,7 +1056,7 @@ class ServerConnector {
 		var connectorContext = this;
 		xhr.addEventListener("readystatechange", function() {
 		if(this.readyState === 4) {
-			connectorContext.getBoard(connectorContext.kanboard.board.boardID)
+			connectorContext.getBoard(connectorContext.kanboard.board.id)
 		}
 		});
 
@@ -695,7 +1073,7 @@ class ServerConnector {
 		var connectorContext = this;
 		xhr.addEventListener("readystatechange", function () {
 			if (this.readyState === 4) {
-				connectorContext.getBoard(connectorContext.kanboard.board.boardID)
+				connectorContext.getBoard(connectorContext.kanboard.board.id)
 			}
 		});
 

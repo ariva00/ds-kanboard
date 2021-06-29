@@ -207,7 +207,7 @@
 	float: right;
 }
 
-.kanboard.tile-header{
+.kanboard.buttons-line{
 	display: flex;
 	flex-direction: row;
 	justify-content: space-between;
