@@ -2,6 +2,7 @@ package com.pollofritto.model;
 
 public class FileTile extends Tile{
 
+	private static final long serialVersionUID = 1;
 	private String fileURI;
 	
 	public FileTile(String title, String author, TileType tileType, String fileURI) {

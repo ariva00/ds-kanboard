@@ -8,6 +8,8 @@ import java.io.Serializable;
  */
 public abstract class Tile implements Serializable {
 
+	private static final long serialVersionUID = 1;
+
 	public enum TileType {Organizational, Informative}
 
 	private long id;

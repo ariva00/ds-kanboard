@@ -46,7 +46,7 @@ public class DataManager {
 	}
 
 	public List<Board> getBoardsClone() {
-		List<Board> boardsCopy = null;
+		List<Board> boardsCopy = new ArrayList<Board>();
 		for (Board b: getBoards()) {
 			boardsCopy.add(b);
 		}

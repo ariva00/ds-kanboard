@@ -9,7 +9,8 @@ import java.util.List;
  *
  */
 public class Board implements Serializable{
-	
+
+	private static final long serialVersionUID = 1;
 	private long id;
 	private String title;
 	private static long instanceCounter = 0L;

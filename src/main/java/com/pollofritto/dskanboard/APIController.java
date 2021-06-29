@@ -34,11 +34,6 @@ public class APIController {
 		}
 	}
 
-	@PostMapping("/upload/image/")
-	public ResponseEntity<String> uploadImage() {
-		return null;
-	}
-
 	@GetMapping("/api/boards/")
 	public List<Board> getBoards() {
 		return DsKanboardApplication.getDataManager().getBoardsClone();
