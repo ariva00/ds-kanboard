@@ -240,7 +240,6 @@
 	margin: 0.3rem;
 	padding: 0.6rem;
 	background-color: var(--input-background);
-	
 }
 
 .kanboard.input::placeholder{
@@ -319,11 +318,14 @@
 	border-top-right-radius: 0.5rem;
 }
 
-.kanboard.button.kanboard.text-button.disabled {
+.kanboard.disabled {
+	cursor: default;
+	color: var(--dark-secondary);
 	background-color: var(--secondary-color-desat);
+	/*filter: blur(5px);*/
 }
 
-.kanboard.button.kanboard.text-button.disabled:hover {
+.kanboard.disabled:hover {
+	background-color: var(--secondary-color-desat);
 	box-shadow: none;
-	cursor: default;
 }

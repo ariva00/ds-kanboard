@@ -251,7 +251,7 @@ class ColumnElement {
 			}
 
 
-			var tile = new TileElement(boardID, column.title, column.tiles[index], tileEditModal, serverConnector, column.state, prevTileID, succTileID);
+			var tile = new TileElement(boardID, column.title, column.tiles[index], tileEditModal, serverConnector, column.state, prevTileID, succTileID, prevTitle, succTitle);
 			this.rootNode.appendChild(tile.getNodeTree());
 		}
 
@@ -382,7 +382,7 @@ class TileCreationElement {
 }
 
 class TileElement {
-	constructor(boardID, columnTitle, tile, tileEditModal, serverConnector, state, prevID, succID) {
+	constructor(boardID, columnTitle, tile, tileEditModal, serverConnector, state, prevID, succID, prevTitle, succTitle) {
 		this.tile = tile;
 		this.rootNode = document.createElement("div");
 		this.rootNode.classList.add("kanboard", "tile");
@@ -435,6 +435,16 @@ class TileElement {
 
 		var tileUpDownDiv = document.createElement("div");
 
+		if (prevTitle != undefined) {
+			var rightButton = document.createElement("span");
+			rightButton.classList.add("material-icons-outlined", "kanboard", "unboxed-button");
+			rightButton.append("arrow_back");
+			rightButton.onclick = function () {
+				serverConnector.moveTile(boardID, columnTitle, tile.id, prevTitle);
+			}
+			tileUpDownDiv.appendChild(rightButton);
+		}
+
 		if (prevID != undefined) {
 			var upButton = document.createElement("span");
 			upButton.append("arrow_upward");
@@ -455,8 +465,17 @@ class TileElement {
 			tileUpDownDiv.appendChild(downButton);
 		}
 
-		tileHeader.appendChild(tileUpDownDiv);
+		if (succTitle != undefined) {
+			var leftButton = document.createElement("span");
+			leftButton.classList.add("material-icons-outlined", "kanboard", "unboxed-button");
+			leftButton.append("arrow_forward");
+			leftButton.onclick = function () {
+				serverConnector.moveTile(boardID, columnTitle, tile.id, succTitle);
+			}
+			tileUpDownDiv.appendChild(leftButton);
+		}
 
+		tileHeader.appendChild(tileUpDownDiv);
 
 		var tileAuthor = document.createElement("p");
 		if (tile.tileType = "Informative")
@@ -721,11 +740,11 @@ class TileCreationModal extends Modal {
 				break;
 			case "file":
 				this.fileLabel.disabled = false;
-				this.fileLabel.classList.add("disabled");
+				this.fileLabel.classList.remove("disabled");
 				this.fileInput.disabled = false;
-				this.fileInput.classList.add("disabled");
+				this.fileInput.classList.remove("disabled");
 				this.textInput.disabled = true;
-				this.textInput.classList.remove("disabled");
+				this.textInput.classList.add("disabled");
 				if (this.fileInput.value == "") {
 					valid = false;
 					this.filename.firstChild.remove();
@@ -986,7 +1005,6 @@ class TileEditModal extends Modal {
 		buttonsDiv.append(cancelButton);
 
 		this.modalDiv.append(buttonsDiv);
-
 	}
 
 	edit(boardID, columnTitle, tile) {
@@ -1040,10 +1058,7 @@ class TileEditModal extends Modal {
 				this.fileURIInput.setAttribute("name", "fileURI");
 		}
 
-
 		this.selectType.value = tile.tileType;
-
-
 
 		this.colorInput.value = tile.color;
 
@@ -1122,6 +1137,9 @@ class ColumnEditModal extends Modal {
 
 	constructor(serverConnector) {
 		super(serverConnector);
+
+		var modalContext = this;
+
 		this.form = document.createElement("form");
 		this.form.classList.add("kanboard", "form");
 
@@ -1137,10 +1155,11 @@ class ColumnEditModal extends Modal {
 		this.colorInput.setAttribute("type", "color");
 		this.colorInput.setAttribute("name", "color");
 		this.form.appendChild(this.colorInput);
+		this.form.onchange = function(){
+			modalContext.validate();
+		}
 
 		this.modalDiv.appendChild(this.form);
-
-		var modalContext = this;
 
 		var buttonsDiv = document.createElement("div");
 		buttonsDiv.classList.add("kanboard", "buttons-line");
@@ -1199,40 +1218,51 @@ class LoginModal extends Modal {
 		var form = document.createElement("form");
 		form.classList.add("kanboard", "form");
 
-		var usernameInput = document.createElement("input");
-		usernameInput.classList.add("kanboard", "input");
-		usernameInput.setAttribute("type", "text");
-		usernameInput.setAttribute("placeholder", "username");
-		usernameInput.setAttribute("name", "username");
+		this.usernameInput = document.createElement("input");
+		this.usernameInput.classList.add("kanboard", "input");
+		this.usernameInput.setAttribute("type", "text");
+		this.usernameInput.setAttribute("placeholder", "username");
+		this.usernameInput.setAttribute("name", "username");
 
-		form.appendChild(usernameInput);
-		this.modalDiv.appendChild(form);
+		form.appendChild(this.usernameInput);
 
-		var button = document.createElement("button");
-		button.disabled = true;
-		button.classList.add("kanboard", "button", "text-button");
-		button.append("LOGIN");
-		this.modalDiv.appendChild(button);
-
-
-		usernameInput.onchange = function () {
-			if (usernameInput.value == "" || usernameInput.value == undefined) {
-				button.disabled = true;
-			}
-			else {
-				button.disabled = false;
-			}
-		}
+		this.button = document.createElement("submit");
+		this.button.disabled = true;
+		this.button.classList.add("kanboard", "button", "text-button");
+		this.button.append("LOGIN");
+		
+		form.appendChild(this.button);
 
 		var modalContext = this;
-		button.onclick = function () {
-			kanboard.init(usernameInput.value);
+
+		form.setAttribute("action", "javascript:void(0);");
+
+		this.modalDiv.appendChild(form);
+
+		this.usernameInput.onkeyup = function () {
+			modalContext.validate();
+		}
+		
+		this.button.onclick = function () {
+			kanboard.init(modalContext.usernameInput.value);
 			modalContext.hide();
 		}
 	}
 
 	login() {
 		this.show();
+		this.validate();
+	}
+
+	validate(){
+		if (this.usernameInput.value == "" || this.usernameInput.value == undefined) {
+			this.button.disabled = true;
+			this.button.classList.add("disabled");
+		}
+		else {
+			this.button.disabled = false;
+			this.button.classList.remove("disabled");
+		}
 	}
 
 }
@@ -1531,8 +1561,25 @@ class ServerConnector {
 			}
 		});
 
-		xhr.open("put", this.uri + "/api/" + boardID + "/" + columnTitle + "/edit/");
+		xhr.open("PUT", this.uri + "/api/" + boardID + "/" + columnTitle + "/edit/");
 
 		xhr.send(data);
+	}
+
+	moveTile(boardID, columnTitle, tileID, destinationColumnTitle) {
+		var xhr = new XMLHttpRequest();
+
+		var connectorContext = this;
+		xhr.addEventListener("readystatechange", function () {
+			if (this.readyState === 4) {
+				connectorContext.getBoard(boardID);
+			}
+		});
+
+		xhr.open("PUT", this.uri + "/api/" + boardID + "/" + columnTitle + "/" + tileID + "/move/");
+
+		xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
+
+		xhr.send("destinationColumnTitle=" + destinationColumnTitle);
 	}
 }
