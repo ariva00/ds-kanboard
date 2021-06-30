@@ -313,11 +313,20 @@
 .kanboard.tile-color{
 	position: absolute; 
 	top: 0%;
+	height: 100%;
+	width: 0.5em; 		
+}
+
+.kanboard.tile-color.tile-informative{
 	left: 0%;
-	width: 0.5em;
-	height: 100%;  
 	border-top-left-radius: 0.5rem; 
 	border-bottom-left-radius: 0.5rem;			
+}
+
+.kanboard.tile-color.tile-organizational{
+	right: 0%;
+	border-top-right-radius: 0.5rem; 
+	border-bottom-right-radius: 0.5rem;			
 }
 
 .kanboard.column-color{

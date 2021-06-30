@@ -3,7 +3,10 @@ package com.pollofritto.model;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import com.pollofritto.model.Column.ColumnState;
 import com.pollofritto.model.exceptions.*;
@@ -14,10 +17,13 @@ public class DataManager {
 	private DataPersistenceManager dataPersistenceManager;
 	
 	private List<Board> boards;
+	private Map<Long, Date> boardsLastModified;
+	private Date lastModified;
 	
 	private long lastTileID;
 	private long lastBoardID;
 
+	@SuppressWarnings("unchecked")
 	public DataManager(DataPersistenceManager persistence) {
 		this.dataPersistenceManager = persistence;
 		try {
@@ -30,6 +36,27 @@ public class DataManager {
 			e.printStackTrace();
 		}
 		updateLastIDs();
+		
+		boardsLastModified = new HashMap<Long, Date>();
+		Date creation = new Date();
+		lastModified = creation;
+		for(Board board : boards) {
+			boardsLastModified.put(board.getId(), creation);
+		}
+	}
+	
+	public Date getLastModified() {
+		return lastModified;
+	}
+	
+	public Date getLastModified(long boardID) {
+		return boardsLastModified.get(boardID);
+	}
+	
+	private Date updateLastModified(long boardID) {
+		Date now = new Date();
+		boardsLastModified.put(boardID, now);
+		return now;
 	}
 	
 	private void updateLastIDs() {
@@ -53,6 +80,11 @@ public class DataManager {
 		}
 	}
 	
+	private Date update(long boardID) {
+		syncStorage();
+		return updateLastModified(boardID);
+	}
+	
 	public synchronized long generateTileID() {
 		return ++lastTileID;
 	}
@@ -63,7 +95,7 @@ public class DataManager {
 	
 	public synchronized void addBoard(Board board) {
 		boards.add(board);
-		syncStorage();
+		update(board.getId());
 	}
 
 	private List<Board> getBoards() {
@@ -104,7 +136,7 @@ public class DataManager {
 
 	private Column getColumn(long boardID, String columnTitle) throws  BoardNotFoundException, ColumnNotFoundException {
 		List<Column> columns = getBoard(boardID).getColumns();
-		for (Column c: columns) {
+		for (Column c : columns) {
 			if (c.getTitle().equals(columnTitle))
 				return c;
 		}
@@ -113,7 +145,7 @@ public class DataManager {
 
 	public Column getColumnCopy(long boardID, String columnTitle) throws BoardNotFoundException, ColumnNotFoundException {
 		List<Column> columns = getBoard(boardID).getColumns();
-		for (Column c: columns) {
+		for (Column c : columns) {
 			if (c.getTitle().equals(columnTitle))
 				return c.copy();
 		}
@@ -132,7 +164,7 @@ public class DataManager {
 		Column selectedColumn = getColumn(boardID, columnTitle);
 		List<Tile> tiles = selectedColumn.getTiles();
 
-		for (Tile t: tiles) {
+		for (Tile t : tiles) {
 			if (t.getId() == tileID) {
 				return t;
 			}
@@ -144,7 +176,7 @@ public class DataManager {
 		Column selectedColumn = getColumn(boardID, columnTitle);
 		List<Tile> tiles = selectedColumn.getTiles();
 
-		for (Tile t: tiles) {
+		for (Tile t : tiles) {
 			if (t.getId() == tileID) {
 				return t.copy();
 			}
@@ -153,34 +185,46 @@ public class DataManager {
 	}
 
 	public synchronized void editColumn(long boardID, String columnTitle, Column editedColumn) throws BoardNotFoundException, ColumnNotFoundException, InvalidRequestException {
-		List<Column> columns = getColumns(boardID);
-
-		for (Column c: columns) {
-			if (c.getTitle().equals(columnTitle)) {
-				if (c.getState().equals(ColumnState.archived) && (editedColumn.getState() == null || editedColumn.getState().equals(ColumnState.archived)))
-					throw new InvalidRequestException("Cannot edit archived column");
-				if (editedColumn.getTitle() != null)
-					c.setTitle(editedColumn.getTitle());
-				if (editedColumn.getState() != null)
-					c.setState(editedColumn.getState());
-				if (editedColumn.getColor() != null)
-					c.setColor(editedColumn.getColor());
-				syncStorage();
-				return;
+		Column selectedColumn = getColumn(boardID, columnTitle);
+		
+		if (!selectedColumn.getTitle().equals(editedColumn.getTitle())) {
+			if(isColumnPresent(boardID, editedColumn.getTitle())) {
+				throw new InvalidRequestException("A column with title \"" + editedColumn.getTitle() + "\" is already present in this board");
 			}
 		}
-		throw new ColumnNotFoundException("No column found with title \"" + columnTitle + "\" in board " + boardID);
+		
+		if (selectedColumn.getState().equals(ColumnState.archived) && (editedColumn.getState() == null || editedColumn.getState().equals(ColumnState.archived)))
+			throw new InvalidRequestException("Cannot edit archived column");
+		if (editedColumn.getTitle() != null)
+			selectedColumn.setTitle(editedColumn.getTitle());
+		if (editedColumn.getState() != null)
+			selectedColumn.setState(editedColumn.getState());
+		if (editedColumn.getColor() != null)
+			selectedColumn.setColor(editedColumn.getColor());
+		update(boardID);
+		return;
 	}
 
+	private boolean isColumnPresent(long boardID, String columnTitle) {
+		try {
+			getColumn(boardID, columnTitle);
+		} catch (ObjectNotFoundException e) { 
+			return false;
+		}
+		return true;
+	}
+	
 	public synchronized void editTile(long boardID, String columnTitle, long tileID, Tile editedTile) throws BoardNotFoundException, ColumnNotFoundException, TileNotFoundException, InvalidRequestException {
 		Tile selectedTile = getTile(boardID, columnTitle, tileID);
-		List<Tile> tiles = getColumnTiles(boardID, columnTitle);
 		Column column = getColumn(boardID, columnTitle);
 
 		if (column.getState().equals(ColumnState.archived)) {
 			throw new InvalidRequestException("Cannot edit tile from archived board");
 		}
 
+		if (editedTile.getTileType() != null && editedTile.getTileType() != selectedTile.getTileType())
+			throw new InvalidRequestException("Cannot edit tileType attribute");
+		
 		if (editedTile.getTitle() != null)
 			selectedTile.setTitle(editedTile.getTitle());
 		if (editedTile.getAuthor() != null)
@@ -194,31 +238,33 @@ public class DataManager {
 			((ImageTile)selectedTile).setImageURI(((ImageTile)editedTile).getImageURI());
 		else if (selectedTile instanceof FileTile && ((FileTile)editedTile).getFileURI() != null)
 			((FileTile)selectedTile).setFileURI(((FileTile)editedTile).getFileURI());
+		
+		update(boardID);
 	}
 
 	public synchronized void addColumn(long boardID, Column column) throws BoardNotFoundException, InvalidRequestException {
 		List<Column> columns = getColumns(boardID);
 
-		for (Column c: columns) {
+		for (Column c : columns) {
 			if (column.getTitle().equals(c.getTitle()))
 				throw new InvalidRequestException("A column with title \"" + column.getTitle() + "\" is already present in this board");
 		}
 		columns.add(column);
-		syncStorage();
+		update(boardID);
 	}
 
 	public synchronized void addTile(long boardID, String columnTitle, Tile tile) throws BoardNotFoundException, ColumnNotFoundException, InvalidRequestException {
 		List<Tile> tiles = getColumnTiles(boardID, columnTitle);
 		Column column = getColumn(boardID, columnTitle);
 
-		for (Tile t: tiles) {
+		for (Tile t : tiles) {
 			if (t.getId() == tile.getId())
 				throw new InvalidRequestException("System error: a tile with id " + tile.getId() + "is already present in this board");
 		}
 
 		if (column.getState().equals(ColumnState.active)) {
 			tiles.add(tile);
-			syncStorage();
+			update(boardID);
 		} else {
 			throw new InvalidRequestException("Cannot add a tile in an archived column");
 		}
@@ -236,7 +282,7 @@ public class DataManager {
 			throw new InvalidRequestException("Cannot swap tiles of an archived column");
 
 		Collections.swap(tiles, indexTile1, indexTile2);
-		syncStorage();
+		update(boardID);
 	}
 
 	public synchronized void swapColumns(long boardID, String column1Title, String column2Title) throws BoardNotFoundException, ColumnNotFoundException, InvalidRequestException {
@@ -250,7 +296,7 @@ public class DataManager {
 			throw new InvalidRequestException("Cannot swap archived columns");
 
 		Collections.swap(columns, indexColumn1, indexColumn2);
-		syncStorage();
+		update(boardID);
 	}
 
 	public synchronized void deleteTile(long boardID, String columnTitle, long tileID) throws BoardNotFoundException, ColumnNotFoundException, TileNotFoundException, InvalidRequestException {
@@ -260,7 +306,7 @@ public class DataManager {
 
 		if (column.getState().equals(ColumnState.active)) {
 			tiles.remove(selectedTile);
-			syncStorage();
+			update(boardID);
 		} else {
 			throw new InvalidRequestException("Cannot delete tile of an archived column");
 		}
@@ -272,7 +318,7 @@ public class DataManager {
 
 		if (selectedColumn.getState().equals(ColumnState.active)) {
 			columns.remove(selectedColumn);
-			syncStorage();
+			update(boardID);
 		} else {
 			throw new InvalidRequestException("Cannot delete an archived column");
 		}
@@ -296,7 +342,7 @@ public class DataManager {
 			destinationTiles.add(selectedTile);
 		}
 		
-		syncStorage();
+		update(boardID);
 	}
 
 }

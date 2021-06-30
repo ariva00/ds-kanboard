@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.server.ResponseStatusException;
 
 /**
  * A Spring Controller that handles requests that are not in the scope of the RESTful API
@@ -33,8 +34,9 @@ public class WebController {
 			String uri = DsKanboardApplication.getFileStorageHandler().storeFile(file);
 			return new ResponseEntity<String>(uri, HttpStatus.CREATED);
 		} catch (IOException e) {
-			e.printStackTrace();
 			return new ResponseEntity<String>(HttpStatus.INTERNAL_SERVER_ERROR);
+		} catch (NullPointerException e) {
+			return new ResponseEntity<String>(HttpStatus.BAD_REQUEST);
 		}
 	}
 	
@@ -45,8 +47,9 @@ public class WebController {
 			String uri = DsKanboardApplication.getFileStorageHandler().storeImage(file);
 			return new ResponseEntity<String>(uri, HttpStatus.CREATED);
 		} catch (IOException e) {
-			e.printStackTrace();
 			return new ResponseEntity<String>(HttpStatus.INTERNAL_SERVER_ERROR);
+		} catch (NullPointerException e) {
+			return new ResponseEntity<String>(HttpStatus.BAD_REQUEST);
 		}
 	}
 	

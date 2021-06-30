@@ -38,6 +38,14 @@ class Kanboard {
 
 		this.updateBoards();
 
+		var kanboardContext = this;
+		this.nabarInterval = setInterval(function() {
+			kanboardContext.serverConnector.getBoardsHeaders();
+		}, 3000);
+
+		this.baordInterval = setInterval(function() {
+			kanboardContext.serverConnector.getBoard(kanboardContext.board.id);
+		}, 3000);
 	}
 
 	updateBoard() {
@@ -57,7 +65,7 @@ class Kanboard {
 			this.rootNode.removeChild(this.navbarElement.getNodeTree())
 		}
 		this.navbarElement = new NavbarElement(this.boards, this.serverConnector, this, this.boardCreationModal, this.loginModal);
-		this.rootNode.appendChild(this.navbarElement.getNodeTree());
+		this.rootNode.insertBefore(this.navbarElement.getNodeTree(), this.rootNode.firstChild);
 	}
 
 	setState(state) {
@@ -91,6 +99,7 @@ class NavbarElement {
 			}
 
 			select.onchange = function () {
+				kanboard.lastBoardModified = undefined;
 				serverConnector.getBoard(select.value);
 			}
 
@@ -126,6 +135,37 @@ class NavbarElement {
 		buttonsSpan.appendChild(newBoardButton);
 
 		this.rootNode.appendChild(buttonsSpan);
+
+		var legend = document.createElement("span");
+		legend.classList.add("kanboard", "buttons-line");
+
+		var informativeLegend = document.createElement("div");
+		informativeLegend.style.margin = "0.5rem";
+		informativeLegend.classList.add("kanboard", "tile");
+		var informativeText = document.createElement("span");
+		informativeText.classList.add("kanboard", "tile-title", "tile-informative");
+		informativeText.append("Informative");
+		informativeLegend.appendChild(informativeText);
+		var informativeColor = document.createElement("div");
+		informativeColor.classList.add("kanboard", "tile-color", "tile-informative");
+		informativeColor.style.backgroundColor = "#f3a704";
+		informativeLegend.appendChild(informativeColor);
+		legend.appendChild(informativeLegend);
+
+		var organizationalLegend = document.createElement("div");
+		organizationalLegend.style.margin = "0.5rem";
+		organizationalLegend.classList.add("kanboard", "tile");
+		var organizationalText = document.createElement("span");
+		organizationalText.classList.add("kanboard", "tile-title", "tile-organizational");
+		organizationalText.append("Organizational");
+		organizationalLegend.appendChild(organizationalText);
+		var organizationalColor = document.createElement("div");
+		organizationalColor.classList.add("kanboard", "tile-color", "tile-organizational");
+		organizationalColor.style.backgroundColor = "#f3a704";
+		organizationalLegend.appendChild(organizationalColor);
+		legend.appendChild(organizationalLegend);
+
+		this.rootNode.append(legend);
 
 		var loginButton = document.createElement("span");
 		loginButton.classList.add("kanboard", "button", "text-button");
@@ -388,7 +428,7 @@ class TileElement {
 		this.rootNode.classList.add("kanboard", "tile");
 
 		var colorDiv = document.createElement("div");
-		colorDiv.classList.add("kanboard", "tile-color");
+		//colorDiv.classList.add("kanboard", "tile-color");
 		colorDiv.style.backgroundColor = tile.color;
 		this.rootNode.appendChild(colorDiv);
 
@@ -397,10 +437,15 @@ class TileElement {
 		tileHeader.classList.add("kanboard", "buttons-line");
 
 		var tileTitle = document.createElement("p");
-		if (tile.tileType == "Informative")
+		if (tile.tileType == "Informative") {
 			tileTitle.classList.add("kanboard", "tile-title", "tile-informative");
-		else
+			colorDiv.classList.add("kanboard", "tile-color", "tile-informative");
+			this.rootNode.title = "Informative";
+		} else {
 			tileTitle.classList.add("kanboard", "tile-title", "tile-organizational");
+			colorDiv.classList.add("kanboard", "tile-color", "tile-organizational");
+			this.rootNode.title = "Organizational";
+		}
 		tileTitle.append(tile.title);
 		tileHeader.appendChild(tileTitle);
 
@@ -484,8 +529,7 @@ class TileElement {
 		tileHeader.appendChild(tileUpDownDiv);
 
 		var tileAuthor = document.createElement("p");
-		if (tile.tileType = "Informative")
-			tileAuthor.classList.add("kanboard", "tile-author");
+		tileAuthor.classList.add("kanboard", "tile-author");
 		tileAuthor.append(tile.author);
 		tileHeader.appendChild(tileAuthor);
 		this.rootNode.appendChild(tileHeader);
@@ -753,6 +797,9 @@ class TileCreationModal extends Modal {
 					this.filename.append(this.fileInput.files[0].name);
 				}
 				this.fileURIInput.setAttribute("name", "imageURI");
+
+				this.fileInput.accept = "image/*";
+
 				break;
 			case "file":
 				this.fileLabel.disabled = false;
@@ -770,6 +817,8 @@ class TileCreationModal extends Modal {
 					this.filename.append(this.fileInput.files[0].name);
 				}
 				this.fileURIInput.setAttribute("name", "fileURI");
+
+				this.fileInput.accept = "*/*";
 		}
 
 		if (valid) {
@@ -1463,13 +1512,17 @@ class ServerConnector {
 				if(this.status === 200){
 					connectorContext.kanboard.board = JSON.parse(this.response);
 					connectorContext.kanboard.updateBoard();
-				} else {
+					connectorContext.kanboard.lastBoardModified = this.getResponseHeader("Last-Modified-Millis");
+				} else if(this.status !== 304) {
 					alert("Error " + this.status + ": " + JSON.parse(this.response).message);
 				}
-			}
+ 			}
 		});
-
+		
 		xhr.open("GET", this.uri + "/api/" + boardID + "/");
+
+		if(this.kanboard.lastBoardModified != undefined)
+			xhr.setRequestHeader("If-Modified-Since-Millis", this.kanboard.lastBoardModified);
 
 		xhr.send();
 	}
@@ -1500,16 +1553,20 @@ class ServerConnector {
 		var connectorContext = this;
 		xhr.addEventListener("readystatechange", function () {
 			if (this.readyState === 4) {
-				if(this.status === 200){
+				if(this.status === 200) {
 					connectorContext.kanboard.boards = JSON.parse(this.response);
 					connectorContext.kanboard.updateNavbar();
-				} else {
+					connectorContext.kanboard.lastModified = this.getResponseHeader("Last-Modified-Millis");
+				} else if(this.status !== 304) {
 					alert("Error " + this.status + ": " + JSON.parse(this.response).message);
 				}
 			}
 		});
 
 		xhr.open("GET", this.uri + "/api/boards/headers/");
+
+		if(this.kanboard.lastModified != undefined)
+			xhr.setRequestHeader("If-Modified-Since-Millis", this.kanboard.lastModified);
 
 		xhr.send();
 	}

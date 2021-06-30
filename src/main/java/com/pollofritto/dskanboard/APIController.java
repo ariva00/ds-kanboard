@@ -11,7 +11,12 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.List;
+
+import javax.servlet.http.HttpServletResponse;
 
 @RestController
 public class APIController {
@@ -25,7 +30,22 @@ public class APIController {
 	}
 
 	@GetMapping("/api/{boardID}/")
-	public Board getBoard(@PathVariable long boardID) {
+	public Board getBoard(@PathVariable long boardID, @RequestHeader(value = "If-Modified-Since-Millis", required = false) String lastModifed, HttpServletResponse response) {
+		SimpleDateFormat format = new SimpleDateFormat("EEE, dd MMM yyyy HH:mm:ss.SSS zzz");
+		
+		if (lastModifed != null) {
+			try {
+				Date clientLastModified = format.parse(lastModifed);
+				Date serverLastModified = DsKanboardApplication.getDataManager().getLastModified(boardID);
+				
+				if(format.format(clientLastModified).equals(format.format(serverLastModified))) {
+					throw new ResponseStatusException(HttpStatus.NOT_MODIFIED);
+				}
+			} catch (ParseException e) {
+				throw new ResponseStatusException(HttpStatus.BAD_REQUEST);
+			}
+		}
+		response.setHeader("Last-Modified-Millis", format.format(DsKanboardApplication.getDataManager().getLastModified(boardID)));
 		try {
 			return DsKanboardApplication.getDataManager().getBoardCopy(boardID);
 		} catch (ObjectNotFoundException e) {
@@ -294,7 +314,23 @@ public class APIController {
 	}
 
 	@GetMapping("/api/boards/headers/")
-	public List<Board> getBoardsHeaders() {
+	public List<Board> getBoardsHeaders(@RequestHeader(value = "If-Modified-Since-Millis", required = false) String lastModifed, HttpServletResponse response) {
+		SimpleDateFormat format = new SimpleDateFormat("EEE, dd MMM yyyy HH:mm:ss.SSS zzz");
+		if(lastModifed != null) {
+			try {
+				Date clientLastModified = format.parse(lastModifed);
+				Date serverLastModified = DsKanboardApplication.getDataManager().getLastModified();
+				
+				if(format.format(clientLastModified).equals(format.format(serverLastModified))) {
+					throw new ResponseStatusException(HttpStatus.NOT_MODIFIED);
+				}
+			} catch (ParseException e) {
+				throw new ResponseStatusException(HttpStatus.BAD_REQUEST);
+			}
+		}
+		
+		response.setHeader("Last-Modified-Millis", format.format(DsKanboardApplication.getDataManager().getLastModified()));
+		
 		List<Board> boards = DsKanboardApplication.getDataManager().getBoardsCopy();
 
 		for (Board b: boards) {
