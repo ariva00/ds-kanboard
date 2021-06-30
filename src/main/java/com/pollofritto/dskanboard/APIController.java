@@ -141,16 +141,16 @@ public class APIController {
 				if(imageURI != null && !imageURI.equals(""))
 					newTile = new ImageTile(title, author, TileType.valueOf(tileType), color, imageURI, DsKanboardApplication.getDataManager().generateTileID());
 				else
-					return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+					throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Missing imageURI");
 				break;
 			case "file":
 				if(fileURI != null && !fileURI.equals(""))
 					newTile = new FileTile(title, author, TileType.valueOf(tileType), color, fileURI, DsKanboardApplication.getDataManager().generateTileID());
 				else
-					return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+					throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Missing fileURI");
 				break;
 			default:
-				return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+				throw new ResponseStatusException(HttpStatus.BAD_REQUEST, contentType + " content type not supported");
 		}
 
 		try {
@@ -223,7 +223,7 @@ public class APIController {
 						throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Cannot change tile class");
 					break;
 				default:
-					return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+					throw new ResponseStatusException(HttpStatus.BAD_REQUEST, contentType + " content type not supported");
 			}
 
 			DsKanboardApplication.getDataManager().editTile(Long.parseLong(boardID), columnTitle, Long.parseLong(tileID), editedTile);

@@ -33,10 +33,8 @@ public class WebController {
 		try {
 			String uri = DsKanboardApplication.getFileStorageHandler().storeFile(file);
 			return new ResponseEntity<String>(uri, HttpStatus.CREATED);
-		} catch (IOException e) {
-			return new ResponseEntity<String>(HttpStatus.INTERNAL_SERVER_ERROR);
-		} catch (NullPointerException e) {
-			return new ResponseEntity<String>(HttpStatus.BAD_REQUEST);
+		} catch (IOException | NullPointerException e) {
+			throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "An unexpected error has occurred");
 		}
 	}
 	
@@ -46,10 +44,8 @@ public class WebController {
 		try {
 			String uri = DsKanboardApplication.getFileStorageHandler().storeImage(file);
 			return new ResponseEntity<String>(uri, HttpStatus.CREATED);
-		} catch (IOException e) {
-			return new ResponseEntity<String>(HttpStatus.INTERNAL_SERVER_ERROR);
-		} catch (NullPointerException e) {
-			return new ResponseEntity<String>(HttpStatus.BAD_REQUEST);
+		} catch (IOException | NullPointerException e) {
+			throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "An unexpected error has occurred");
 		}
 	}
 	
@@ -67,13 +63,10 @@ public class WebController {
 			header.add("Content-Disposition", "attachment; filename=" + filename);
 			response = new ResponseEntity<byte[]>(body, header, HttpStatus.OK);
 			
-			
 		} catch (FileNotFoundException e) {
-			e.printStackTrace();
-			response = new ResponseEntity<byte[]>(HttpStatus.NOT_FOUND);
+			throw new ResponseStatusException(HttpStatus.NOT_FOUND, filename + " does not exists");
 		} catch (IOException e) {
-			e.printStackTrace();
-			response = new ResponseEntity<byte[]>(HttpStatus.INTERNAL_SERVER_ERROR);
+			throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "An unexpected error has occurred");
 		}
 		
 		return response;
@@ -94,13 +87,10 @@ public class WebController {
 			header.add("Content-Disposition", "attachment; filename=" + filename);
 			response = new ResponseEntity<byte[]>(body, header, HttpStatus.OK);
 			
-			
 		} catch (FileNotFoundException e) {
-			e.printStackTrace();
-			response = new ResponseEntity<byte[]>(HttpStatus.NOT_FOUND);
+			throw new ResponseStatusException(HttpStatus.NOT_FOUND, filename + " does not exists");
 		} catch (IOException e) {
-			e.printStackTrace();
-			response = new ResponseEntity<byte[]>(HttpStatus.INTERNAL_SERVER_ERROR);
+			throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "An unexpected error has occurred");
 		}
 		
 		return response;
