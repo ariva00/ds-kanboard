@@ -289,6 +289,7 @@ class ColumnHeaderElement {
 
 		if (column.state == "active") {
 			archiveButton.append("archive");
+			archiveButton.title = "archive";
 			archiveButton.onclick = function () {
 				serverConnector.archiveColumn(boardID, column.title);
 			}
@@ -296,6 +297,7 @@ class ColumnHeaderElement {
 
 		if (column.state == "archived") {
 			archiveButton.append("unarchive");
+			archiveButton.title = "unarchive";
 			archiveButton.onclick = function () {
 				serverConnector.archiveColumn(boardID, column.title, false);
 			}
@@ -307,14 +309,16 @@ class ColumnHeaderElement {
 			var editButton = document.createElement("span");
 			editButton.classList.add("material-icons-outlined", "kanboard", "unboxed-button")
 			editButton.append("edit");
+			editButton.title = "edit";
 			editButton.onclick = function () {
-				columnEditModal.edit(boardID, column.title);
+				columnEditModal.edit(boardID, column);
 			}
 			buttonsSpan.appendChild(editButton);
 
 			var deleteButton = document.createElement("span");
 			deleteButton.classList.add("material-icons-outlined", "kanboard", "delete-button");
 			deleteButton.append("delete");
+			deleteButton.title = "delete";
 			deleteButton.onclick = function () {
 				serverConnector.deleteColumn(boardID, column.title);
 			}
@@ -331,23 +335,25 @@ class ColumnHeaderElement {
 		var columnRightLeftSpan = document.createElement("span");
 
 		if (prevTitle != undefined) {
-			var rightButton = document.createElement("span");
-			rightButton.classList.add("material-icons-outlined", "kanboard", "unboxed-button");
-			rightButton.append("arrow_back");
-			rightButton.onclick = function () {
+			var leftButton = document.createElement("span");
+			leftButton.classList.add("material-icons-outlined", "kanboard", "unboxed-button");
+			leftButton.append("arrow_back");
+			leftButton.title = "move left";
+			leftButton.onclick = function () {
 				serverConnector.swapColumns(boardID, column.title, prevTitle);
 			}
-			columnRightLeftSpan.appendChild(rightButton);
+			columnRightLeftSpan.appendChild(leftButton);
 		}
 
 		if (succTitle != undefined) {
-			var leftButton = document.createElement("span");
-			leftButton.classList.add("material-icons-outlined", "kanboard", "unboxed-button");
-			leftButton.append("arrow_forward");
-			leftButton.onclick = function () {
+			var rightButton = document.createElement("span");
+			rightButton.classList.add("material-icons-outlined", "kanboard", "unboxed-button");
+			rightButton.append("arrow_forward");
+			rightButton.title = "move right";
+			rightButton.onclick = function () {
 				serverConnector.swapColumns(boardID, column.title, succTitle);
 			}
-			columnRightLeftSpan.appendChild(leftButton);
+			columnRightLeftSpan.appendChild(rightButton);
 		}
 
 		this.rootNode.appendChild(columnRightLeftSpan);
@@ -406,6 +412,7 @@ class TileElement {
 		if (state == "active") {
 			var editButton = document.createElement("span");
 			editButton.append("edit");
+			editButton.title = "edit";
 			editButton.classList.add("material-icons-outlined", "kanboard", "unboxed-button");
 			editButton.onclick = function () {
 				tileEditModal.edit(boardID, columnTitle, tile);
@@ -413,7 +420,8 @@ class TileElement {
 			tileEditDeleteDiv.appendChild(editButton);
 
 			var deleteButton = document.createElement("span");
-			deleteButton.append("delete")
+			deleteButton.append("delete");
+			deleteButton.title = "delete";
 			deleteButton.classList.add("material-icons-outlined", "kanboard", "delete-button");
 			deleteButton.onclick = function () {
 				serverConnector.deleteTile(boardID, columnTitle, tile.id);
@@ -432,18 +440,20 @@ class TileElement {
 		var tileUpDownDiv = document.createElement("div");
 
 		if (prevTitle != undefined) {
-			var rightButton = document.createElement("span");
-			rightButton.classList.add("material-icons-outlined", "kanboard", "unboxed-button");
-			rightButton.append("arrow_back");
-			rightButton.onclick = function () {
+			var leftButton = document.createElement("span");
+			leftButton.classList.add("material-icons-outlined", "kanboard", "unboxed-button");
+			leftButton.append("arrow_back");
+			leftButton.title = "move left";
+			leftButton.onclick = function () {
 				serverConnector.moveTile(boardID, columnTitle, tile.id, prevTitle);
 			}
-			tileUpDownDiv.appendChild(rightButton);
+			tileUpDownDiv.appendChild(leftButton);
 		}
 
 		if (prevID != undefined) {
 			var upButton = document.createElement("span");
 			upButton.append("arrow_upward");
+			upButton.title = "move up";
 			upButton.classList.add("material-icons-outlined", "kanboard", "unboxed-button");
 			upButton.onclick = function () {
 				serverConnector.swapTiles(boardID, columnTitle, tile.id, prevID);
@@ -454,6 +464,7 @@ class TileElement {
 		if (succID != undefined) {
 			var downButton = document.createElement("span");
 			downButton.append("arrow_downward");
+			downButton.title = "move down";
 			downButton.classList.add("material-icons-outlined", "kanboard", "unboxed-button");
 			downButton.onclick = function () {
 				serverConnector.swapTiles(boardID, columnTitle, tile.id, succID);
@@ -462,13 +473,14 @@ class TileElement {
 		}
 
 		if (succTitle != undefined) {
-			var leftButton = document.createElement("span");
-			leftButton.classList.add("material-icons-outlined", "kanboard", "unboxed-button");
-			leftButton.append("arrow_forward");
-			leftButton.onclick = function () {
+			var rightButton = document.createElement("span");
+			rightButton.classList.add("material-icons-outlined", "kanboard", "unboxed-button");
+			rightButton.append("arrow_forward");
+			rightButton.title = "move right";
+			rightButton.onclick = function () {
 				serverConnector.moveTile(boardID, columnTitle, tile.id, succTitle);
 			}
-			tileUpDownDiv.appendChild(leftButton);
+			tileUpDownDiv.appendChild(rightButton);
 		}
 
 		tileHeader.appendChild(tileUpDownDiv);
@@ -783,11 +795,18 @@ class ColumnCreationModal extends Modal {
 		this.titleInput.setAttribute("name", "columnTitle");
 		this.form.appendChild(this.titleInput);
 
+		var colorInputSpan = document.createElement("span");
+		colorInputSpan.classList.add("kanboard", "buttons-line", "input");
+		colorInputSpan.append("Color: ");
+
 		this.colorInput = document.createElement("input");
-		this.colorInput.classList.add("kanboard", "input");
+		this.colorInput.classList.add("kanboard", "color-input");
 		this.colorInput.setAttribute("type", "color");
 		this.colorInput.setAttribute("name", "color");
-		this.form.appendChild(this.colorInput);
+
+		colorInputSpan.appendChild(this.colorInput);
+		this.form.appendChild(colorInputSpan);
+
 
 		this.modalDiv.appendChild(this.form);
 
@@ -831,7 +850,7 @@ class ColumnCreationModal extends Modal {
 	}
 
 	validate() {
-		var valid = ture;
+		var valid = true;
 		if (this.titleInput.value == "" || this.titleInput.value == undefined) {
 			valid = false
 		}
@@ -897,7 +916,7 @@ class BoardCreationModal extends Modal {
 	}
 
 	validate() {
-		var valid = ture;
+		var valid = true;
 		if (this.titleInput.value == "" || this.titleInput.value == undefined) {
 			valid = false
 		}
@@ -951,11 +970,18 @@ class TileEditModal extends Modal {
 		this.textInput.setAttribute("name", "text");
 		this.form.appendChild(this.textInput);
 
+		var colorInputSpan = document.createElement("span");
+		colorInputSpan.classList.add("kanboard", "buttons-line", "input");
+		colorInputSpan.append("Color: ");
+
 		this.colorInput = document.createElement("input");
-		this.colorInput.classList.add("kanboard", "input");
+		this.colorInput.classList.add("kanboard", "color-input");
 		this.colorInput.setAttribute("type", "color");
 		this.colorInput.setAttribute("name", "color");
-		this.form.appendChild(this.colorInput);
+
+		colorInputSpan.appendChild(this.colorInput);
+		this.form.appendChild(colorInputSpan);
+
 
 		this.fileURIInput = document.createElement("input");
 		this.fileURIInput.setAttribute("type", "hidden");
@@ -1156,11 +1182,18 @@ class ColumnEditModal extends Modal {
 		this.titleInput.setAttribute("name", "columnTitle");
 		this.form.appendChild(this.titleInput);
 
+		var colorInputSpan = document.createElement("span");
+		colorInputSpan.classList.add("kanboard", "buttons-line", "input");
+		colorInputSpan.append("Color: ");
+
 		this.colorInput = document.createElement("input");
-		this.colorInput.classList.add("kanboard", "input");
+		this.colorInput.classList.add("kanboard", "color-input");
 		this.colorInput.setAttribute("type", "color");
 		this.colorInput.setAttribute("name", "color");
-		this.form.appendChild(this.colorInput);
+
+		colorInputSpan.appendChild(this.colorInput);
+		this.form.appendChild(colorInputSpan);
+
 		this.form.onchange = function(){
 			modalContext.validate();
 		}
@@ -1187,13 +1220,13 @@ class ColumnEditModal extends Modal {
 
 	}
 
-	edit(boardID, columnTitle) {
-		this.titleInput.value = columnTitle;
-		this.colorInput.value = "#f000";
+	edit(boardID, column) {
+		this.titleInput.value = column.title;
+		this.colorInput.value = column.color;
 
 		var modalContext = this;
 		this.createButton.onclick = function () {
-			modalContext.serverConnector.editColumn(boardID, columnTitle, new FormData(modalContext.form));
+			modalContext.serverConnector.editColumn(boardID, column.title, new FormData(modalContext.form));
 			modalContext.hide();
 		}
 		this.show();
@@ -1201,7 +1234,7 @@ class ColumnEditModal extends Modal {
 	}
 
 	validate() {
-		var valid = ture;
+		var valid = true;
 		if (this.titleInput.value == "" || this.titleInput.value == undefined) {
 			valid = false
 		}
