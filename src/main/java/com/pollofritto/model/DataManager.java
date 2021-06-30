@@ -290,7 +290,12 @@ public class DataManager {
 
 		int sourceColumnTileIndex = sourceTiles.indexOf(selectedTile);
 		sourceTiles.remove(selectedTile);
-		destinationTiles.add(sourceColumnTileIndex, selectedTile);
+		try {
+			destinationTiles.add(sourceColumnTileIndex, selectedTile);
+		} catch (IndexOutOfBoundsException e){
+			destinationTiles.add(selectedTile);
+		}
+		
 		syncStorage();
 	}
 

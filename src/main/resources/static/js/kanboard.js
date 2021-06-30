@@ -326,8 +326,6 @@ class ColumnHeaderElement {
 		}
 
 
-
-
 		tileHeader.appendChild(buttonsSpan);
 
 		this.rootNode.appendChild(tileHeader);
@@ -567,6 +565,9 @@ class TileCreationModal extends Modal {
 		this.form.onchange = function () {
 			modalContext.validate();
 		}
+		this.form.onkeyup = function () {
+			modalContext.validate();
+		}
 
 		this.titleInput = document.createElement("input");
 		this.titleInput.classList.add("kanboard", "input");
@@ -667,7 +668,8 @@ class TileCreationModal extends Modal {
 
 		this.modalDiv.appendChild(this.fileForm);
 
-
+		this.form.setAttribute("action", "javascript:void(0);");
+		this.fileForm.setAttribute("action", "javascript:void(0);");
 
 		var buttonsDiv = document.createElement("div");
 		buttonsDiv.classList.add("kanboard", "buttons-line");
@@ -810,9 +812,14 @@ class ColumnCreationModal extends Modal {
 
 		this.modalDiv.appendChild(this.form);
 
+		this.form.setAttribute("action", "javascript:void(0);");
+
 		var modalContext = this;
 
-		this.form.onchange = function(){
+		this.form.onchange = function () {
+			modalContext.validate();
+		}
+		this.form.onkeyup = function () {
 			modalContext.validate();
 		}
 
@@ -880,9 +887,19 @@ class BoardCreationModal extends Modal {
 		this.titleInput.setAttribute("name", "boardTitle");
 		this.form.appendChild(this.titleInput);
 
+		this.form.setAttribute("action", "javascript:void(0);");
+
 		this.modalDiv.appendChild(this.form);
 
 		var modalContext = this;
+
+		this.titleInput.onkeyup = function (e) {
+			if (e.code == "Enter") {
+				modalContext.serverConnector.createBoard(new FormData(modalContext.form));
+				modalContext.hide();
+			}
+			modalContext.validate();
+		}
 
 		var buttonsDiv = document.createElement("div");
 		buttonsDiv.classList.add("kanboard", "buttons-line");
@@ -942,6 +959,9 @@ class TileEditModal extends Modal {
 		this.form = document.createElement("form");
 		this.form.classList.add("kanboard", "form");
 		this.form.onchange = function () {
+			modalContext.validate();
+		}
+		this.form.onkeyup = function () {
 			modalContext.validate();
 		}
 
@@ -1019,6 +1039,9 @@ class TileEditModal extends Modal {
 		this.fileForm.appendChild(this.fileLabel);
 
 		this.modalDiv.appendChild(this.fileForm);
+
+		this.form.setAttribute("action", "javascript:void(0);");
+		this.fileForm.setAttribute("action", "javascript:void(0);");
 
 		var buttonsDiv = document.createElement("div");
 		buttonsDiv.classList.add("kanboard", "buttons-line");
@@ -1194,10 +1217,15 @@ class ColumnEditModal extends Modal {
 		colorInputSpan.appendChild(this.colorInput);
 		this.form.appendChild(colorInputSpan);
 
-		this.form.onchange = function(){
+		this.form.onchange = function () {
 			modalContext.validate();
 		}
 
+		this.form.onkeyup = function () {
+			modalContext.validate();
+		}
+
+		this.form.setAttribute("action", "javascript:void(0);");
 		this.modalDiv.appendChild(this.form);
 
 		var buttonsDiv = document.createElement("div");
@@ -1270,7 +1298,7 @@ class LoginModal extends Modal {
 		this.button.disabled = true;
 		this.button.classList.add("kanboard", "button", "text-button");
 		this.button.append("LOGIN");
-		
+
 		form.appendChild(this.button);
 
 		var modalContext = this;
@@ -1280,20 +1308,20 @@ class LoginModal extends Modal {
 		this.modalDiv.appendChild(form);
 
 		this.usernameInput.onkeyup = function (e) {
-			if(e.code == "Enter"){
+			if (e.code == "Enter") {
 				modalContext.authenticate();
 			}
 			modalContext.validate();
 		}
-		
+
 		this.button.onclick = function () {
 			modalContext.authenticate();
-			
+
 		}
 	}
 
-	authenticate(){
-		if(this.usernameInput.value != "" && this.usernameInput.value != undefined){
+	authenticate() {
+		if (this.usernameInput.value != "" && this.usernameInput.value != undefined) {
 			this.kanboard.init(this.usernameInput.value);
 			this.hide();
 		} else {
@@ -1307,7 +1335,7 @@ class LoginModal extends Modal {
 		this.validate();
 	}
 
-	validate(){
+	validate() {
 		if (this.usernameInput.value == "" || this.usernameInput.value == undefined) {
 			this.button.disabled = true;
 		}
