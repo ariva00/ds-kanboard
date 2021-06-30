@@ -1,7 +1,5 @@
 package com.pollofritto.dskanboard;
 
-import com.pollofritto.dskanboard.exceptions.NotFoundException;
-import com.pollofritto.dskanboard.exceptions.BadRequestException;
 import com.pollofritto.model.*;
 import com.pollofritto.model.Column.ColumnState;
 import com.pollofritto.model.Tile.TileType;
@@ -11,6 +9,7 @@ import com.pollofritto.model.exceptions.ObjectNotFoundException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;
 
@@ -22,15 +21,15 @@ public class APIController {
 		Board board = new Board(DsKanboardApplication.getDataManager().generateBoardID(), boardTitle);
 		DsKanboardApplication.getDataManager().addBoard(board);
 		String boardURI = "/api/" + board.getId() + '/';
-		return new ResponseEntity<>(boardURI, HttpStatus.OK);
+		return new ResponseEntity<>(boardURI, HttpStatus.CREATED);
 	}
 
 	@GetMapping("/api/{boardID}/")
-	public Board getBoard(@PathVariable long boardID) throws NotFoundException {
+	public Board getBoard(@PathVariable long boardID) {
 		try {
 			return DsKanboardApplication.getDataManager().getBoardCopy(boardID);
 		} catch (ObjectNotFoundException e) {
-			throw new NotFoundException(e.getMessage());
+			throw new ResponseStatusException(HttpStatus.NOT_FOUND, e.getMessage());
 		}
 	}
 
@@ -42,41 +41,41 @@ public class APIController {
 	@PostMapping("/api/{boardID}/columns/add/")
 	public ResponseEntity<String> addColumn(@PathVariable String boardID,
 											@RequestParam (value = "columnTitle") String columnTitle,
-											@RequestParam (value = "color", required = false) String color) throws BadRequestException, NotFoundException {
+											@RequestParam (value = "color", required = false) String color) {
 
 		Column column = new Column(columnTitle, color);
 
 		if (columnTitle.isEmpty())
-			throw new BadRequestException("Column title cannot be empty");
+			throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Missing Title");
 
 		try {
 			DsKanboardApplication.getDataManager().addColumn(Long.parseLong(boardID), column);
 		} catch (InvalidRequestException e) {
-			throw new BadRequestException(e.getMessage());
+			throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage());
 		} catch (ObjectNotFoundException e) {
-			throw new NotFoundException(e.getMessage());
+			throw new ResponseStatusException(HttpStatus.NOT_FOUND, e.getMessage());
 		}
 
 		String columnURI = "/api/" + boardID + "/" + column.getTitle() + "/";
-		return new ResponseEntity<>(columnURI, HttpStatus.OK);
+		return new ResponseEntity<>(columnURI, HttpStatus.CREATED);
 	}
 
 	@GetMapping("/api/{boardID}/columns/")
-	public List<Column> getColumns(@PathVariable String boardID) throws NotFoundException {
+	public List<Column> getColumns(@PathVariable String boardID) {
 		try {
 			return DsKanboardApplication.getDataManager().getColumnsCopy(Long.parseLong(boardID));
 		} catch (ObjectNotFoundException e) {
-			throw new NotFoundException(e.getMessage());
+			throw new ResponseStatusException(HttpStatus.NOT_FOUND, e.getMessage());
 		}
 	}
 
 	@GetMapping("/api/{boardID}/{columnTitle}/")
 	public Column getColumn(@PathVariable String boardID,
-							@PathVariable String columnTitle) throws NotFoundException {
+							@PathVariable String columnTitle) {
 		try {
 			return DsKanboardApplication.getDataManager().getColumnCopy(Long.parseLong(boardID), columnTitle);
 		} catch (ObjectNotFoundException e) {
-			throw new NotFoundException(e.getMessage());
+			throw new ResponseStatusException(HttpStatus.NOT_FOUND, e.getMessage());
 		}
 	}
 
@@ -85,16 +84,16 @@ public class APIController {
 											 @PathVariable String columnTitle,
 											 @RequestParam (value = "columnTitle", required = false) String newTitle,
 											 @RequestParam (value = "state", required = false) ColumnState columnState,
-											 @RequestParam (value = "color", required = false) String color) throws BadRequestException, NotFoundException {
+											 @RequestParam (value = "color", required = false) String color) {
 
 		Column editedColumn = new Column(newTitle, columnState, color);
 
 		try {
 			DsKanboardApplication.getDataManager().editColumn(Long.parseLong(boardID), columnTitle, editedColumn);
 		} catch (InvalidRequestException e) {
-			throw new BadRequestException(e.getMessage());
+			throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage());
 		} catch (ObjectNotFoundException e) {
-			throw new NotFoundException(e.getMessage());
+			throw new ResponseStatusException(HttpStatus.NOT_FOUND, e.getMessage());
 		}
 
 		String columnURI = "/api/" + boardID + "/" + editedColumn.getTitle() + "/";
@@ -111,7 +110,7 @@ public class APIController {
 										  @RequestParam (value = "text", required = false) String text,
 										  @RequestParam (value = "imageURI", required = false) String imageURI,
 										  @RequestParam (value = "fileURI", required = false) String fileURI,
-										  @RequestParam (value = "contentType") String contentType) throws BadRequestException, NotFoundException {
+										  @RequestParam (value = "contentType") String contentType) {
 		Tile newTile;
 
 		switch (contentType) {
@@ -119,10 +118,16 @@ public class APIController {
 				newTile = new TextTile(title, author, TileType.valueOf(tileType), color, text, DsKanboardApplication.getDataManager().generateTileID());
 				break;
 			case "image":
-				newTile = new ImageTile(title, author, TileType.valueOf(tileType), color, imageURI, DsKanboardApplication.getDataManager().generateTileID());
+				if(imageURI != null && !imageURI.equals(""))
+					newTile = new ImageTile(title, author, TileType.valueOf(tileType), color, imageURI, DsKanboardApplication.getDataManager().generateTileID());
+				else
+					return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
 				break;
 			case "file":
-				newTile = new FileTile(title, author, TileType.valueOf(tileType), color, fileURI, DsKanboardApplication.getDataManager().generateTileID());
+				if(fileURI != null && !fileURI.equals(""))
+					newTile = new FileTile(title, author, TileType.valueOf(tileType), color, fileURI, DsKanboardApplication.getDataManager().generateTileID());
+				else
+					return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
 				break;
 			default:
 				return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
@@ -131,33 +136,33 @@ public class APIController {
 		try {
 			DsKanboardApplication.getDataManager().addTile(Long.parseLong(boardID), columnTitle, newTile);
 		} catch (InvalidRequestException e) {
-			throw new BadRequestException(e.getMessage());
+			throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage());
 		} catch (ObjectNotFoundException e) {
-			throw new NotFoundException(e.getMessage());
+			throw new ResponseStatusException(HttpStatus.NOT_FOUND, e.getMessage());
 		}
 
 		String tileURI = "/api/" + boardID + "/" + columnTitle + "/" + newTile.getId() + '/';
-		return new ResponseEntity<>(tileURI, HttpStatus.OK);
+		return new ResponseEntity<>(tileURI, HttpStatus.CREATED);
 	}
 
 	@GetMapping("/api/{boardID}/{columnTitle}/tiles/")
 	public List<Tile> getColumnTiles(@PathVariable String boardID,
-									 @PathVariable String columnTitle) throws NotFoundException {
+									 @PathVariable String columnTitle) {
 		try {
 			return DsKanboardApplication.getDataManager().getColumnTilesCopy(Long.parseLong(boardID), columnTitle);
 		} catch (ObjectNotFoundException e) {
-			throw new NotFoundException(e.getMessage());
+			throw new ResponseStatusException(HttpStatus.NOT_FOUND, e.getMessage());
 		}
 	}
 
 	@GetMapping("/api/{boardID}/{columnTitle}/{tileID}/")
 	public Tile getTile(@PathVariable String boardID,
 										@PathVariable String columnTitle,
-										@PathVariable String tileID) throws NotFoundException {
+										@PathVariable String tileID) {
 		try {
 			return DsKanboardApplication.getDataManager().getTileCopy(Long.parseLong(boardID), columnTitle, Long.parseLong(tileID));
 		} catch (ObjectNotFoundException e) {
-			throw new NotFoundException(e.getMessage());
+			throw new ResponseStatusException(HttpStatus.NOT_FOUND, e.getMessage());
 		}
 	}
 
@@ -172,7 +177,7 @@ public class APIController {
 										   @RequestParam (value = "text", required = false) String text,
 										   @RequestParam (value = "imageURI", required = false) String imageURI,
 										   @RequestParam (value = "fileURI", required = false) String fileURI,
-										   @RequestParam (value = "contentType") String contentType) throws BadRequestException, NotFoundException {
+										   @RequestParam (value = "contentType") String contentType) {
 
 		try {
 			Tile selectedTile = DsKanboardApplication.getDataManager().getTileCopy(Long.parseLong(boardID), columnTitle, Long.parseLong(tileID));
@@ -183,19 +188,19 @@ public class APIController {
 					if (selectedTile instanceof  TextTile)
 						editedTile = new TextTile(tileTitle, tileAuthor, TileType.valueOf(tileType), color, text, Long.parseLong(tileID));
 					else
-						throw new BadRequestException("Cannot change tile class");
+						throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Cannot change tile class");
 					break;
 				case "image":
 					if (selectedTile instanceof ImageTile)
 						editedTile = new ImageTile(tileTitle, tileAuthor, TileType.valueOf(tileType), color, imageURI, Long.parseLong(tileID));
 					else
-						throw new BadRequestException("Cannot change tile class");
+						throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Cannot change tile class");
 					break;
 				case "file":
 					if (selectedTile instanceof FileTile)
 						editedTile = new FileTile(tileTitle, tileAuthor, TileType.valueOf(tileType), color, fileURI, Long.parseLong(tileID));
 					else
-						throw new BadRequestException("Cannot change tile class");
+						throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Cannot change tile class");
 					break;
 				default:
 					return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
@@ -206,9 +211,9 @@ public class APIController {
 			return new ResponseEntity<>(tileURI, HttpStatus.OK);
 
 		} catch (InvalidRequestException e) {
-			throw new BadRequestException(e.getMessage());
+			throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage());
 		} catch (ObjectNotFoundException e) {
-			throw new NotFoundException(e.getMessage());
+			throw new ResponseStatusException(HttpStatus.NOT_FOUND, e.getMessage());
 		}
 
 	}
@@ -217,30 +222,29 @@ public class APIController {
 	public ResponseEntity<String> moveTile(@PathVariable String boardID,
 										   @PathVariable String columnTitle,
 										   @PathVariable String tileID,
-										   @RequestParam (value = "destinationColumnTitle") String destinationColumnTitle) throws BadRequestException, NotFoundException {
+										   @RequestParam (value = "destinationColumnTitle") String destinationColumnTitle) {
 		try {
 			DsKanboardApplication.getDataManager().moveTile(Long.parseLong(boardID), columnTitle, destinationColumnTitle, Long.parseLong(tileID));
 		} catch (InvalidRequestException e) {
-			throw new BadRequestException(e.getMessage());
+			throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage());
 		} catch (ObjectNotFoundException e) {
-			throw new NotFoundException(e.getMessage());
+			throw new ResponseStatusException(HttpStatus.NOT_FOUND, e.getMessage());
 		}
 
 		String movedTileURI = "/api/" + boardID + "/" + columnTitle + "/" + tileID + "/";
 		return new ResponseEntity<>(movedTileURI, HttpStatus.OK);
 	}
 
-	// TODO: check "Cannot invoke "com.pollofritto.model.Column.getTiles()" because the return value of "com.pollofritto.model.DataManager.getColumn(long, String)" is null"
 	@PutMapping("/api/{boardID}/columns/swap/")
 	public ResponseEntity<String> swapColumns(@PathVariable String boardID,
 											  @RequestParam (value = "column1") String column1,
-											  @RequestParam (value = "column2") String column2) throws BadRequestException, NotFoundException {
+											  @RequestParam (value = "column2") String column2) {
 		try {
 			DsKanboardApplication.getDataManager().swapColumns(Long.parseLong(boardID), column1, column2);
 		} catch (InvalidRequestException e) {
-			throw new BadRequestException(e.getMessage());
+			throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage());
 		} catch (ObjectNotFoundException e) {
-			throw new NotFoundException(e.getMessage());
+			throw new ResponseStatusException(HttpStatus.NOT_FOUND, e.getMessage());
 		}
 		return new ResponseEntity<>(HttpStatus.OK);
 	}
@@ -249,46 +253,45 @@ public class APIController {
 	public ResponseEntity<String> swapTiles(@PathVariable String boardID,
 											@PathVariable String columnTitle,
 											@RequestParam (value = "tileID1") String tileID1,
-											@RequestParam (value = "tileID2") String tileID2) throws BadRequestException, NotFoundException{
+											@RequestParam (value = "tileID2") String tileID2) {
 		try {
 			DsKanboardApplication.getDataManager().swapTiles(Long.parseLong(boardID), columnTitle, Long.parseLong(tileID1), Long.parseLong(tileID2));
 		} catch (InvalidRequestException e) {
-			throw new BadRequestException(e.getMessage());
+			throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage());
 		} catch (ObjectNotFoundException e) {
-			throw new NotFoundException(e.getMessage());
+			throw new ResponseStatusException(HttpStatus.NOT_FOUND, e.getMessage());
 		}
 		return new ResponseEntity<>(HttpStatus.OK);
 	}
 
 	@DeleteMapping("/api/{boardID}/{columnTitle}/delete/")
 	public ResponseEntity<String> deleteColumn(@PathVariable String boardID,
-											   @PathVariable String columnTitle)  throws BadRequestException, NotFoundException {
+											   @PathVariable String columnTitle) {
 		try {
 			DsKanboardApplication.getDataManager().deleteColumn(Long.parseLong(boardID), columnTitle);
 		} catch (InvalidRequestException e) {
-			throw new BadRequestException(e.getMessage());
+			throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage());
 		} catch (ObjectNotFoundException e) {
-			throw new NotFoundException(e.getMessage());
+			throw new ResponseStatusException(HttpStatus.NOT_FOUND, e.getMessage());
 		}
 
 		return new ResponseEntity<>(HttpStatus.OK);
 	}
 
 	@DeleteMapping("/api/{boardID}/{columnTitle}/{tileID}/delete/")
-	public ResponseEntity<String> deleteColumn(@PathVariable String boardID,
+	public ResponseEntity<String> deleteTile(@PathVariable String boardID,
 											   @PathVariable String columnTitle,
-											   @PathVariable String tileID) throws BadRequestException, NotFoundException {
+											   @PathVariable String tileID) {
 		try {
 			DsKanboardApplication.getDataManager().deleteTile(Long.parseLong(boardID), columnTitle, Long.parseLong(tileID));
 		} catch (InvalidRequestException e) {
-			throw new BadRequestException(e.getMessage());
+			throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage());
 		} catch (ObjectNotFoundException e) {
-			throw new NotFoundException(e.getMessage());
+			throw new ResponseStatusException(HttpStatus.NOT_FOUND, e.getMessage());
 		}
 
 		return new ResponseEntity<>(HttpStatus.OK);
 	}
-
 
 	@GetMapping("/api/boards/headers/")
 	public List<Board> getBoardsHeaders() {

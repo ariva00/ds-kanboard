@@ -1359,7 +1359,11 @@ class ServerConnector {
 		var connectorContext = this;
 		xhr.addEventListener("readystatechange", function () {
 			if (this.readyState === 4) {
-				connectorContext.getBoards()
+				if(this.status === 201){
+					connectorContext.getBoards();
+				} else {
+					alert("Error " + this.status + ": " + JSON.parse(this.response).message);
+				}
 			}
 		});
 
@@ -1374,7 +1378,11 @@ class ServerConnector {
 		var connectorContext = this;
 		xhr.addEventListener("readystatechange", function () {
 			if (this.readyState === 4) {
-				connectorContext.getBoard(boardID);
+				if(this.status === 201){
+					connectorContext.getBoard(boardID);
+				} else {
+					alert("Error " + this.status + ": " + JSON.parse(this.response).message);
+				}
 			}
 		});
 
@@ -1389,8 +1397,12 @@ class ServerConnector {
 		var connectorContext = this;
 		xhr.addEventListener("readystatechange", function () {
 			if (this.readyState === 4) {
-				fileURIInput.value = this.responseText;
-				connectorContext.createTile(boardID, columnTitle, new FormData(dataForm));
+				if(this.status === 201) {
+					fileURIInput.value = this.responseText;
+					connectorContext.createTile(boardID, columnTitle, new FormData(dataForm));
+				} else {
+					alert("Error " + this.status + ": " + JSON.parse(this.response).message);
+				}
 			}
 		});
 
@@ -1405,8 +1417,12 @@ class ServerConnector {
 		var connectorContext = this;
 		xhr.addEventListener("readystatechange", function () {
 			if (this.readyState === 4) {
-				fileURIInput.value = this.responseText;
-				connectorContext.createTile(boardID, columnTitle, new FormData(dataForm));
+				if(this.status === 201) {
+					fileURIInput.value = this.responseText;
+					connectorContext.createTile(boardID, columnTitle, new FormData(dataForm));
+				} else {
+					alert("Error " + this.status + ": " + JSON.parse(this.response).message);
+				}
 			}
 		});
 
@@ -1425,7 +1441,11 @@ class ServerConnector {
 		var connectorContext = this;
 		xhr.addEventListener("readystatechange", function () {
 			if (this.readyState === 4) {
-				connectorContext.getBoard(boardID);
+				if(this.status === 201){
+					connectorContext.getBoard(boardID);
+				} else {
+					alert("Error " + this.status + ": " + JSON.parse(this.response).message);
+				}
 			}
 		});
 
@@ -1440,8 +1460,12 @@ class ServerConnector {
 		var connectorContext = this;
 		xhr.addEventListener("readystatechange", function () {
 			if (this.readyState === 4) {
-				connectorContext.kanboard.board = JSON.parse(this.response);
-				connectorContext.kanboard.updateBoard();
+				if(this.status === 200){
+					connectorContext.kanboard.board = JSON.parse(this.response);
+					connectorContext.kanboard.updateBoard();
+				} else {
+					alert("Error " + this.status + ": " + JSON.parse(this.response).message);
+				}
 			}
 		});
 
@@ -1456,8 +1480,12 @@ class ServerConnector {
 		var connectorContext = this;
 		xhr.addEventListener("readystatechange", function () {
 			if (this.readyState === 4) {
-				connectorContext.kanboard.boards = JSON.parse(this.response);
-				connectorContext.kanboard.updateNavbar();
+				if(this.status === 200){
+					connectorContext.kanboard.boards = JSON.parse(this.response);
+					connectorContext.kanboard.updateNavbar();
+				} else {
+					alert("Error " + this.status + ": " + JSON.parse(this.response).message);
+				}
 			}
 		});
 
@@ -1472,8 +1500,12 @@ class ServerConnector {
 		var connectorContext = this;
 		xhr.addEventListener("readystatechange", function () {
 			if (this.readyState === 4) {
-				connectorContext.kanboard.boards = JSON.parse(this.response);
-				connectorContext.kanboard.updateNavbar();
+				if(this.status === 200){
+					connectorContext.kanboard.boards = JSON.parse(this.response);
+					connectorContext.kanboard.updateNavbar();
+				} else {
+					alert("Error " + this.status + ": " + JSON.parse(this.response).message);
+				}
 			}
 		});
 
@@ -1488,7 +1520,11 @@ class ServerConnector {
 		var connectorContext = this;
 		xhr.addEventListener("readystatechange", function () {
 			if (this.readyState === 4) {
-				connectorContext.getBoard(connectorContext.kanboard.board.id);
+				if(this.status === 200) {
+					connectorContext.getBoard(boardID);
+				} else {
+					alert("Error " + this.status + ": " + JSON.parse(this.response).message);
+				}
 			}
 		});
 
@@ -1503,7 +1539,11 @@ class ServerConnector {
 		var connectorContext = this;
 		xhr.addEventListener("readystatechange", function () {
 			if (this.readyState === 4) {
-				connectorContext.getBoard(connectorContext.kanboard.board.id);
+				if(this.status === 200) {
+					connectorContext.getBoard(boardID);
+				} else {
+					alert("Error " + this.status + ": " + JSON.parse(this.response).message);
+				}
 			}
 		});
 
@@ -1520,7 +1560,11 @@ class ServerConnector {
 		var connectorContext = this;
 		xhr.addEventListener("readystatechange", function () {
 			if (this.readyState === 4) {
-				connectorContext.getBoard(connectorContext.kanboard.board.id)
+				if(this.status === 200) {
+					connectorContext.getBoard(boardID);
+				} else {
+					alert("Error " + this.status + ": " + JSON.parse(this.response).message);
+				}
 			}
 		});
 
@@ -1544,7 +1588,11 @@ class ServerConnector {
 		var connectorContext = this;
 		xhr.addEventListener("readystatechange", function () {
 			if (this.readyState === 4) {
-				connectorContext.getBoard(connectorContext.kanboard.board.id)
+				if(this.status === 200) {
+					connectorContext.getBoard(boardID);
+				} else {
+					alert("Error " + this.status + ": " + JSON.parse(this.response).message);
+				}
 			}
 		});
 
@@ -1561,7 +1609,11 @@ class ServerConnector {
 		var connectorContext = this;
 		xhr.addEventListener("readystatechange", function () {
 			if (this.readyState === 4) {
-				connectorContext.getBoard(connectorContext.kanboard.board.id)
+				if(this.status === 200) {
+					connectorContext.getBoard(boardID);
+				} else {
+					alert("Error " + this.status + ": " + JSON.parse(this.response).message);
+				}
 			}
 		});
 
@@ -1579,8 +1631,12 @@ class ServerConnector {
 			var connectorContext = this;
 			xhr.addEventListener("readystatechange", function () {
 				if (this.readyState === 4) {
-					fileURIInput.value = this.responseText;
-					connectorContext.editTile(boardID, columnTitle, tileID, new FormData(dataForm));
+					if(this.status === 201){
+						fileURIInput.value = this.responseText;
+						connectorContext.editTile(boardID, columnTitle, tileID, new FormData(dataForm));
+					} else {
+						alert("Error " + this.status + ": " + JSON.parse(this.response).message);
+					}
 				}
 			});
 
@@ -1599,8 +1655,12 @@ class ServerConnector {
 			var connectorContext = this;
 			xhr.addEventListener("readystatechange", function () {
 				if (this.readyState === 4) {
-					fileURIInput.value = this.responseText;
-					connectorContext.editTile(boardID, columnTitle, tileID, new FormData(dataForm));
+					if(this.status === 201){
+						fileURIInput.value = this.responseText;
+						connectorContext.editTile(boardID, columnTitle, tileID, new FormData(dataForm));
+					} else {
+						alert("Error " + this.status + ": " + JSON.parse(this.response).message);
+					}
 				}
 			});
 
@@ -1621,7 +1681,11 @@ class ServerConnector {
 		var connectorContext = this;
 		xhr.addEventListener("readystatechange", function () {
 			if (this.readyState === 4) {
-				connectorContext.getBoard(boardID);
+				if(this.status === 200){
+					connectorContext.getBoard(boardID);
+				} else {
+					alert("Error " + this.status + ": " + JSON.parse(this.response).message);
+				}
 			}
 		});
 
@@ -1636,7 +1700,11 @@ class ServerConnector {
 		var connectorContext = this;
 		xhr.addEventListener("readystatechange", function () {
 			if (this.readyState === 4) {
-				connectorContext.getBoard(boardID);
+				if(this.status === 200){
+					connectorContext.getBoard(boardID);
+				} else {
+					alert("Error " + this.status + ": " + JSON.parse(this.response).message);
+				}
 			}
 		});
 
@@ -1651,7 +1719,11 @@ class ServerConnector {
 		var connectorContext = this;
 		xhr.addEventListener("readystatechange", function () {
 			if (this.readyState === 4) {
-				connectorContext.getBoard(boardID);
+				if(this.status === 200){
+					connectorContext.getBoard(boardID);
+				} else {
+					alert("Error " + this.status + ": " + JSON.parse(this.response).message);
+				}
 			}
 		});
 

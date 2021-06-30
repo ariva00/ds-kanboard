@@ -30,7 +30,8 @@ public class WebController {
 	@ResponseBody
 	public ResponseEntity<String> uploadFile(@RequestParam("file") MultipartFile file) {
 		try {
-			return new ResponseEntity<String>(DsKanboardApplication.getFileStorageHandler().storeFile(file), HttpStatus.CREATED);
+			String uri = DsKanboardApplication.getFileStorageHandler().storeFile(file);
+			return new ResponseEntity<String>(uri, HttpStatus.CREATED);
 		} catch (IOException e) {
 			e.printStackTrace();
 			return new ResponseEntity<String>(HttpStatus.INTERNAL_SERVER_ERROR);
