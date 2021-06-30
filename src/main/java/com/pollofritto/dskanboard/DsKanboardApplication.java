@@ -8,6 +8,11 @@ import com.pollofritto.persistence.FileStorageManager;
 import com.pollofritto.persistence.FileSystemDataPersistenceManager;
 import com.pollofritto.persistence.FileSystemFileStorageManager;
 
+/**
+ * 
+ * {@link SpringBootApplication} presenting a kanban board API and a web application to interact with it
+ *
+ */
 @SpringBootApplication
 public class DsKanboardApplication {
 

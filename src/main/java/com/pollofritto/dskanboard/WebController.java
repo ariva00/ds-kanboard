@@ -12,20 +12,24 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.server.ResponseStatusException;
 
+import com.pollofritto.persistence.FileStorageManager;
+
 /**
- * A Spring Controller that handles requests that are not in the scope of the RESTful API
+ * 
+ * {@link RestController} for handling the web application requests
  *
  */
 @Controller
 public class WebController {
 	
 	/**
-	 * Handles post requests for file upload
+	 * Stores a copy of the received file through the {@link FileStorageManager}
 	 * @param file
-	 * @return
+	 * @return the URI to get the file
 	 */
 	@PostMapping("/files/add/")
 	@ResponseBody
@@ -38,6 +42,11 @@ public class WebController {
 		}
 	}
 	
+	/**
+	 * Stores a copy of the received image after rescaling it through the {@link FileStorageManager}
+	 * @param file
+	 * @return the URI to get the file
+	 */
 	@PostMapping("/images/add/")
 	@ResponseBody
 	public ResponseEntity<String> uploadImage(@RequestParam("file") MultipartFile file) {
@@ -49,6 +58,11 @@ public class WebController {
 		}
 	}
 	
+	/**
+	 * Returns the image at the specified URI
+	 * @param filename
+	 * @return
+	 */
 	@GetMapping("/images/{filename}")
 	@ResponseBody
 	public ResponseEntity<byte[]> getImage(@PathVariable("filename") String filename){
@@ -73,6 +87,11 @@ public class WebController {
 		
 	}
 	
+	/**
+	 * Returns the file at the specified URI
+	 * @param filename
+	 * @return
+	 */
 	@GetMapping("/files/{filename}")
 	@ResponseBody
 	public ResponseEntity<byte[]> getFile(@PathVariable("filename") String filename){

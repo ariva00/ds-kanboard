@@ -18,9 +18,19 @@ import java.util.List;
 
 import javax.servlet.http.HttpServletResponse;
 
+/**
+ * 
+ * {@link RestController} for handling the API requests
+ *
+ */
 @RestController
 public class APIController {
 
+	/**
+	 * Creates a new {@link Board}
+	 * @param boardTitle title of the new {@link Board}
+	 * @return
+	 */
 	@PostMapping("/api/boards/add/")
 	public ResponseEntity<String> addBoard(@RequestParam (value = "boardTitle") String boardTitle) {
 		Board board = new Board(DsKanboardApplication.getDataManager().generateBoardID(), boardTitle);
@@ -29,6 +39,14 @@ public class APIController {
 		return new ResponseEntity<>(boardURI, HttpStatus.CREATED);
 	}
 
+	/**
+	 * Returns the {@link Board} with id {boardID}
+	 * @param boardID id of the {@link Board}
+	 * @param lastModifed {@link String} representing the instant in format "EEE, dd MMM yyyy HH:mm:ss.SSS zzz" (e.g. "Sun, 20 Jul 1969 16:17:00.000 EDT") 
+	 * 			indicating the last update received from the server
+	 * @param response 
+	 * @return
+	 */
 	@GetMapping("/api/{boardID}/")
 	public Board getBoard(@PathVariable long boardID, @RequestHeader(value = "If-Modified-Since-Millis", required = false) String lastModifed, HttpServletResponse response) {
 		SimpleDateFormat format = new SimpleDateFormat("EEE, dd MMM yyyy HH:mm:ss.SSS zzz");
@@ -53,11 +71,22 @@ public class APIController {
 		}
 	}
 
+	/**
+	 * Returns the list of all the boards
+	 * @return
+	 */
 	@GetMapping("/api/boards/")
 	public List<Board> getBoards() {
 		return DsKanboardApplication.getDataManager().getBoardsCopy();
 	}
 
+	/**
+	 * Creates a new {@link Column} in the {@link Board} with id {boardID}
+	 * @param boardID id of the {@link Board}
+	 * @param columnTitle title of the new {@link Column}
+	 * @param color {@link String} in format "#rrggbbaa" representing the color of the new {@link Column}
+	 * @return
+	 */
 	@PostMapping("/api/{boardID}/columns/add/")
 	public ResponseEntity<String> addColumn(@PathVariable String boardID,
 											@RequestParam (value = "columnTitle") String columnTitle,
@@ -80,6 +109,11 @@ public class APIController {
 		return new ResponseEntity<>(columnURI, HttpStatus.CREATED);
 	}
 
+	/**
+	 * Returns the list of all the columns in a {@link Board} with id {boardID}
+	 * @param boardID id of the {@link Board}
+	 * @return
+	 */
 	@GetMapping("/api/{boardID}/columns/")
 	public List<Column> getColumns(@PathVariable String boardID) {
 		try {
@@ -89,6 +123,12 @@ public class APIController {
 		}
 	}
 
+	/**
+	 * Return the {@link Column} with title {columnTitle} in the {@link Board} with id {boardID}
+	 * @param boardID id of the {@link Board}
+	 * @param columnTitle title of the {@link Column}
+	 * @return
+	 */
 	@GetMapping("/api/{boardID}/{columnTitle}/")
 	public Column getColumn(@PathVariable String boardID,
 							@PathVariable String columnTitle) {
@@ -99,6 +139,15 @@ public class APIController {
 		}
 	}
 
+	/**
+	 * Edits the {@link Column} with title {columnTitle} in the {@link Board} with id {boardID}
+	 * @param boardID id of the {@link Board}
+	 * @param columnTitle current title of the {@link Column}
+	 * @param newTitle edited title of the {@link Column}
+	 * @param columnState {@link String} representing the edited {@link ColumnState} of the {@link Column}
+	 * @param color {@link String} in format "#rrggbbaa" representing the edited color of the {@link Column}
+	 * @return
+	 */
 	@PutMapping("/api/{boardID}/{columnTitle}/edit/")
 	public ResponseEntity<String> editColumn(@PathVariable String boardID,
 											 @PathVariable String columnTitle,
@@ -120,6 +169,20 @@ public class APIController {
 		return new ResponseEntity<>(columnURI, HttpStatus.OK);
 	}
 
+	/**
+	 * Creates a new {@link Tile} in the {@link Column} with title {columnTitle} in the board with id {boardID}
+	 * @param boardID id of the {@link Board}
+	 * @param columnTitle title of the {@link Column}
+	 * @param title title of the new {@link Tile}
+	 * @param author username of the author or the new {@link Tile}
+	 * @param tileType {@link String} representing the {@link TileType} of the new {@link Tile}
+	 * @param color {@link String} in format "#rrggbbaa" representing the color of the new {@link Tile}
+	 * @param text content of the new {@link Tile} when a new {@link TextTile} is being created
+	 * @param imageURI content of the new {@link Tile} when a new {@link ImageTile} is being created
+	 * @param fileURI content of the new {@link Tile} when a new {@link FileTile} is being created
+	 * @param contentType {@link String} weather "text", "image" or "file" representing the concrete implementation of the new {@link Tile}
+	 * @return
+	 */
 	@PostMapping("/api/{boardID}/{columnTitle}/tiles/add/")
 	public ResponseEntity<String> addTile(@PathVariable String boardID,
 										  @PathVariable String columnTitle,
@@ -165,6 +228,12 @@ public class APIController {
 		return new ResponseEntity<>(tileURI, HttpStatus.CREATED);
 	}
 
+	/**
+	 * Returns the list of all the tiles in the {@link Column} with title {columnTitle} in the board with id {boardID}
+	 * @param boardID id of
+	 * @param columnTitle
+	 * @return
+	 */
 	@GetMapping("/api/{boardID}/{columnTitle}/tiles/")
 	public List<Tile> getColumnTiles(@PathVariable String boardID,
 									 @PathVariable String columnTitle) {
@@ -175,6 +244,13 @@ public class APIController {
 		}
 	}
 
+	/**
+	 * Returns the {@link Tile} with id {tileID} in the {@link Column} with title {columnTitle} in the {@link Board} with id {boardID}
+	 * @param boardID id of the {@link Board}
+	 * @param columnTitle title of the {@link Column}
+	 * @param tileID id of the {@link Tile}
+	 * @return
+	 */
 	@GetMapping("/api/{boardID}/{columnTitle}/{tileID}/")
 	public Tile getTile(@PathVariable String boardID,
 										@PathVariable String columnTitle,
@@ -186,6 +262,21 @@ public class APIController {
 		}
 	}
 
+	/**
+	 * Edits the {@link Tile} with id {tileID} in the {@link Column} with title {columnTitle} in the {@link Board} with id {boardID}
+	 * @param boardID id of the {@link Board}
+	 * @param columnTitle title of the {@link Column}
+	 * @param tileID id of the {@link Tile}
+	 * @param tileTitle edited title of the {@link Tile}
+	 * @param tileAuthor edited author of the {@link Tile}
+	 * @param tileType {@link String} representing the {@link TileType} of the {@link Tile}
+	 * @param color {@link String} in format "#rrggbbaa" representing the edited color of the {@link Tile}
+	 * @param text edited content of the {@link Tile} when a {@link TextTile} is being edited
+	 * @param imageURI edited content of the {@link Tile} when a {@link ImageTile} is being edited
+	 * @param fileURI edited content of the {@link Tile} when a {@link FileTile} is being edited
+	 * @param contentType {@link String} weather "text", "image" or "file" representing the concrete implementation of the edited {@link Tile}
+	 * @return
+	 */
 	@PutMapping("/api/{boardID}/{columnTitle}/{tileID}/edit/")
 	public ResponseEntity<String> editTile(@PathVariable String boardID,
 										   @PathVariable String columnTitle,
@@ -238,6 +329,14 @@ public class APIController {
 
 	}
 
+	/**
+	 * Moves a {@link Tile} from a {@link Column} with title {columnTitle} to another in the same {@link Board} with id {boardID}
+	 * @param boardID id of the {@link Board}
+	 * @param columnTitle title of the current {@link Column}
+	 * @param tileID id of the {@link Tile}
+	 * @param destinationColumnTitle title of the destination {@link Column}
+	 * @return
+	 */
 	@PutMapping("/api/{boardID}/{columnTitle}/{tileID}/move/")
 	public ResponseEntity<String> moveTile(@PathVariable String boardID,
 										   @PathVariable String columnTitle,
@@ -255,6 +354,13 @@ public class APIController {
 		return new ResponseEntity<>(movedTileURI, HttpStatus.OK);
 	}
 
+	/**
+	 * Swaps the position of two columns in the {@link Board} with id {boardID}
+	 * @param boardID id of the {@link Board}
+	 * @param column1 title of the first {@link Column}
+	 * @param column2 title of the second {@link Column}
+	 * @return
+	 */
 	@PutMapping("/api/{boardID}/columns/swap/")
 	public ResponseEntity<String> swapColumns(@PathVariable String boardID,
 											  @RequestParam (value = "column1") String column1,
@@ -269,6 +375,14 @@ public class APIController {
 		return new ResponseEntity<>(HttpStatus.OK);
 	}
 
+	/**
+	 * Swaps the position of two tiles in the {@link Column} with title {columnTitle} in the {@link Board} with id {boardID}
+	 * @param boardID id of the {@link Board}
+	 * @param columnTitle title of the {@link Column}
+	 * @param tileID1 id of the first {@link Tile}
+	 * @param tileID2 id of the second {@link Tile}
+	 * @return
+	 */
 	@PutMapping("/api/{boardID}/{columnTitle}/tiles/swap/")
 	public ResponseEntity<String> swapTiles(@PathVariable String boardID,
 											@PathVariable String columnTitle,
@@ -284,6 +398,12 @@ public class APIController {
 		return new ResponseEntity<>(HttpStatus.OK);
 	}
 
+	/**
+	 * Deletes the {@link Column} with title {columnTitle} in the board with id {boardID}
+	 * @param boardID id of the {@link Board}
+	 * @param columnTitle title of the {@link Column}
+	 * @return
+	 */
 	@DeleteMapping("/api/{boardID}/{columnTitle}/delete/")
 	public ResponseEntity<String> deleteColumn(@PathVariable String boardID,
 											   @PathVariable String columnTitle) {
@@ -298,6 +418,13 @@ public class APIController {
 		return new ResponseEntity<>(HttpStatus.OK);
 	}
 
+	/**
+	 * Deletes the {@link Tile} with id {tileID} in the {@link Column} with title {columnTitle} in the {@link Board} with id {boardID}
+	 * @param boardID id of the {@link Board}
+	 * @param columnTitle title of the {@link Column}
+	 * @param tileID id of the {@link Tile}
+	 * @return
+	 */
 	@DeleteMapping("/api/{boardID}/{columnTitle}/{tileID}/delete/")
 	public ResponseEntity<String> deleteTile(@PathVariable String boardID,
 											   @PathVariable String columnTitle,
@@ -313,6 +440,13 @@ public class APIController {
 		return new ResponseEntity<>(HttpStatus.OK);
 	}
 
+	/**
+	 * Returns the list of all the boards without the columns data
+	 * @param lastModifed {@link String} representing the instant in format "EEE, dd MMM yyyy HH:mm:ss.SSS zzz" (e.g. "Sun, 20 Jul 1969 16:17:00.000 EDT") 
+	 * 			indicating the last update received from the server
+	 * @param response
+	 * @return
+	 */
 	@GetMapping("/api/boards/headers/")
 	public List<Board> getBoardsHeaders(@RequestHeader(value = "If-Modified-Since-Millis", required = false) String lastModifed, HttpServletResponse response) {
 		SimpleDateFormat format = new SimpleDateFormat("EEE, dd MMM yyyy HH:mm:ss.SSS zzz");
