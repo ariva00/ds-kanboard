@@ -80,9 +80,6 @@ class NavbarElement {
 		var buttonsSpan = document.createElement("span");
 		buttonsSpan.style.display = "flex";
 
-
-
-
 		if (boards != undefined && boards.length > 0) {
 			var select = document.createElement("select");
 			select.classList.add("kanboard", "input");
@@ -139,6 +136,7 @@ class NavbarElement {
 		var icon = document.createElement("span");
 		icon.classList.add("material-icons-outlined");
 		icon.append("account_circle");
+		icon.style.paddingLeft = "0.3rem";
 		loginButton.appendChild(icon);
 
 		loginButton.onclick = function () {
@@ -146,8 +144,6 @@ class NavbarElement {
 		}
 
 		this.rootNode.append(loginButton);
-
-
 	}
 
 	getNodeTree() {
@@ -610,11 +606,17 @@ class TileCreationModal extends Modal {
 		this.textInput.setAttribute("name", "text");
 		this.form.appendChild(this.textInput);
 
+		var colorInputSpan = document.createElement("span");
+		colorInputSpan.classList.add("kanboard", "buttons-line", "input");
+		colorInputSpan.append("Color: ");
+
 		this.colorInput = document.createElement("input");
-		this.colorInput.classList.add("kanboard", "input");
+		this.colorInput.classList.add("kanboard", "color-input");
 		this.colorInput.setAttribute("type", "color");
 		this.colorInput.setAttribute("name", "color");
-		this.form.appendChild(this.colorInput);
+
+		colorInputSpan.appendChild(this.colorInput);
+		this.form.appendChild(colorInputSpan);
 
 		this.fileURIInput = document.createElement("input");
 		this.fileURIInput.setAttribute("type", "hidden");
@@ -790,6 +792,10 @@ class ColumnCreationModal extends Modal {
 		this.modalDiv.appendChild(this.form);
 
 		var modalContext = this;
+
+		this.form.onchange = function(){
+			modalContext.validate();
+		}
 
 		var buttonsDiv = document.createElement("div");
 		buttonsDiv.classList.add("kanboard", "buttons-line");
@@ -1215,6 +1221,7 @@ class LoginModal extends Modal {
 
 	constructor(kanboard) {
 		super();
+		this.kanboard = kanboard;
 		var form = document.createElement("form");
 		form.classList.add("kanboard", "form");
 
@@ -1239,17 +1246,30 @@ class LoginModal extends Modal {
 
 		this.modalDiv.appendChild(form);
 
-		this.usernameInput.onkeyup = function () {
+		this.usernameInput.onkeyup = function (e) {
+			if(e.code == "Enter"){
+				modalContext.authenticate();
+			}
 			modalContext.validate();
 		}
 		
 		this.button.onclick = function () {
-			kanboard.init(modalContext.usernameInput.value);
-			modalContext.hide();
+			modalContext.authenticate();
+			
+		}
+	}
+
+	authenticate(){
+		if(this.usernameInput.value != "" && this.usernameInput.value != undefined){
+			this.kanboard.init(this.usernameInput.value);
+			this.hide();
+		} else {
+			this.usernameInput.focus();
 		}
 	}
 
 	login() {
+		this.usernameInput.value = "";
 		this.show();
 		this.validate();
 	}
@@ -1257,11 +1277,9 @@ class LoginModal extends Modal {
 	validate(){
 		if (this.usernameInput.value == "" || this.usernameInput.value == undefined) {
 			this.button.disabled = true;
-			this.button.classList.add("disabled");
 		}
 		else {
 			this.button.disabled = false;
-			this.button.classList.remove("disabled");
 		}
 	}
 
