@@ -94,6 +94,102 @@ The user interface also allows for active columns in the same board to be
 swapped.
 
 
+### API endpoints
+
+* Creates a new Board <br>
+```
+POST /api/boards/add/
+```
+
+* Returns the Board with id {boardID} <br>
+```
+GET /api/{boardID}/
+```
+
+* Returns the list of all the boards <br>
+```
+GET /api/boards/
+```
+
+* Creates a new Column in the Board with id {boardID} <br>
+```
+POST /api/{boardID}/columns/add/
+```
+
+* Returns the list of all the columns in a Board with id {boardID} <br>
+```
+GET /api/{boardID}/columns/
+```
+
+* Return the Column with title {columnTitle} in the Board with id {boardID} <br>
+```
+GET /api/{boardID}/{columnTitle}/
+```
+
+* Edits the Column with title {columnTitle} in the Board with id {boardID} <br>
+```
+PUT /api/{boardID}/{columnTitle}/edit/
+```
+
+* Creates a new Tile in the Column with title {columnTitle} in the board with id
+{boardID} <br>
+```
+POST /api/{boardID}/{columnTitle}/tiles/add/
+```
+
+* Returns the list of all the tiles in the Column with title {columnTitle} in
+the board with id {boardID} <br>
+```
+GET /api/{boardID}/{columnTitle}/tiles/
+```
+
+* Returns the Tile with id {tileID} in the Column with title {columnTitle} in the
+Board with id {boardID} <br>
+```
+GET /api/{boardID}/{columnTitle}/{tileID}/
+```
+
+* Edits the Tile with id {tileID} in the Column with title {columnTitle} in the
+Board with id {boardID} <br>
+```
+PUT /api/{boardID}/{columnTitle}/{tileID}/edit/
+```
+
+* Moves a Tile from a Column with title {columnTitle} to another in the same Board
+with id {boardID} <br>
+```
+PUT /api/{boardID}/{columnTitle}/{tileID}/move/
+```
+
+* Swaps the position of two columns in the Board with id {boardID} <br>
+```
+PUT /api/{boardID}/columns/swap/
+```
+
+* Swaps the position of two tiles in the Column with title {columnTitle} in the
+Board with id {boardID} <br>
+```
+PUT /api/{boardID}/{columnTitle}/tiles/swap/
+```
+
+* Deletes the Column with title {columnTitle} in the board with id {boardID}
+<br> 
+```
+DELETE /api/{boardID}/{columnTitle}/delete/
+```
+
+* Deletes the Tile with id {tileID} in the Column with title {columnTitle} in
+the Board with id {boardID} <br>
+```
+DELETE /api/{boardID}/{columnTitle}/{tileID}/delete/
+```
+
+* Returns the list of all the boards without the columns data <br>
+```
+GET /api/boards/headers/
+```
+
+
 ### Help page
 By clicking on the question mark icon, the user will land on a help page where
 all the UI elements are explained.
