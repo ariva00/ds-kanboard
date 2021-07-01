@@ -20,14 +20,14 @@ import com.pollofritto.persistence.FileStorageManager;
 
 /**
  * 
- * {@link RestController} for handling the web application requests
+ * {@link RestController} for handling the web application requests.
  *
  */
 @Controller
 public class WebController {
 	
 	/**
-	 * Stores a copy of the received file through the {@link FileStorageManager}
+	 * Stores a copy of the received file through the {@link FileStorageManager}.
 	 * @param file
 	 * @return the URI to get the file
 	 */
@@ -35,7 +35,7 @@ public class WebController {
 	@ResponseBody
 	public ResponseEntity<String> uploadFile(@RequestParam("file") MultipartFile file) {
 		try {
-			String uri = DsKanboardApplication.getFileStorageHandler().storeFile(file);
+			String uri = DsKanboardApplication.getFileStorageManager().storeFile(file);
 			return new ResponseEntity<String>(uri, HttpStatus.CREATED);
 		} catch (IOException | NullPointerException e) {
 			throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "An unexpected error has occurred");
@@ -43,7 +43,7 @@ public class WebController {
 	}
 	
 	/**
-	 * Stores a copy of the received image after rescaling it through the {@link FileStorageManager}
+	 * Stores a copy of the received image after rescaling it through the {@link FileStorageManager}.
 	 * @param file
 	 * @return the URI to get the file
 	 */
@@ -51,7 +51,7 @@ public class WebController {
 	@ResponseBody
 	public ResponseEntity<String> uploadImage(@RequestParam("file") MultipartFile file) {
 		try {
-			String uri = DsKanboardApplication.getFileStorageHandler().storeImage(file);
+			String uri = DsKanboardApplication.getFileStorageManager().storeImage(file);
 			return new ResponseEntity<String>(uri, HttpStatus.CREATED);
 		} catch (IOException | NullPointerException e) {
 			throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "An unexpected error has occurred");
@@ -59,7 +59,7 @@ public class WebController {
 	}
 	
 	/**
-	 * Returns the image at the specified URI
+	 * Returns the image at the specified URI.
 	 * @param filename
 	 * @return
 	 */
@@ -71,7 +71,7 @@ public class WebController {
 		byte[] body;
 		
 		try {
-			body = DsKanboardApplication.getFileStorageHandler().getFile(filename);
+			body = DsKanboardApplication.getFileStorageManager().getFile(filename);
 			
 			header = new HttpHeaders();
 			header.add("Content-Disposition", "attachment; filename=" + filename);
@@ -88,7 +88,7 @@ public class WebController {
 	}
 	
 	/**
-	 * Returns the file at the specified URI
+	 * Returns the file at the specified URI.
 	 * @param filename
 	 * @return
 	 */
@@ -100,7 +100,7 @@ public class WebController {
 		byte[] body;
 		
 		try {
-			body = DsKanboardApplication.getFileStorageHandler().getFile(filename);
+			body = DsKanboardApplication.getFileStorageManager().getFile(filename);
 			
 			header = new HttpHeaders();
 			header.add("Content-Disposition", "attachment; filename=" + filename);
