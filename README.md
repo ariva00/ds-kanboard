@@ -11,27 +11,13 @@ web-application.
 
 ![kanboard-screenshot](./images/screenshot.png)
 
-<!-- START doctoc generated TOC please keep comment here to allow auto update -->
-<!-- DON'T EDIT THIS SECTION, INSTEAD RE-RUN doctoc TO UPDATE -->
-**Table of Contents**
-
-- [Contributors](#contributors)
-- [Instructions](#instructions)
-  - [Load and start](#load-and-start)
-  - [Login](#login)
-  - [Multiple boards](#multiple-boards)
-  - [Persistence](#persistence)
-  - [Tile types](#tile-types)
-  - [Client caching](#client-caching)
-  - [Tile swap](#tile-swap)
-  - [API endpoints](#api-endpoints)
-
-<!-- END doctoc generated TOC please keep comment here to allow auto update -->
+<!-- START doctoc -->
+<!-- END doctoc -->
 
 
 ## Contributors
 * Alessandro Riva, mat. ------ 
-* Lorenzo Olearo, mat. ------
+* Lorenzo Olearo, mat. ------ 
 
 
 ## Instructions 
@@ -94,9 +80,12 @@ the client request, the server will return a different response:
   header `Last-Modified-Millis`, this value is then saved by the client to be
   sent at any later request.
   
+The format of the custom header is the following:
 
+``` 
 "EEE, dd MMM yyyy HH:mm:ss.SSS zzz" (e.g. "Sun, 20 Jul 1969 16:17:00.000 EDT")
-  
+```
+
 
 ### Tile swap
 The user interface allows for tiles in the same column to be swapped and for any
@@ -105,5 +94,6 @@ The user interface also allows for active columns in the same board to be
 swapped.
 
 
-### API endpoints
-*api endpoints description here*
+### Help page
+By clicking on the question mark icon, the user will land on a help page where
+all the UI elements are explained.
