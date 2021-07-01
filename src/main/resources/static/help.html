@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+	<title>Help</title>
+	<link rel="preconnect" href="https://fonts.googleapis.com">
+	<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+
+	<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Condensed" rel="stylesheet">
+
+	<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono" rel="stylesheet">
+
+	<link href="https://fonts.googleapis.com/icon?family=Material+Icons+Outlined" rel="stylesheet">
+
+
+	<script src="js/kanboard.js"></script>
+	<link rel="stylesheet" href="css/kanboard.css">
+
+</head>
+
+<body>
+	<h1>Need help?</h1>
+	<h2>Column</h2>
+	<div class="kanboard column">
+		<div class="kanboard tile">
+			<div class="kanboard column-color" style="background-color: rgb(68, 157, 213);"></div>
+			<div class="kanboard buttons-line">
+				<p class="kanboard column-title">column</p><span><span
+						class="material-icons-outlined kanboard unboxed-button" title="archive">archive</span><span
+						class="material-icons-outlined kanboard unboxed-button" title="edit">edit</span><span
+						class="material-icons-outlined kanboard delete-button" title="delete">delete</span></span>
+			</div><span><span class="material-icons-outlined kanboard unboxed-button"
+					title="move left">arrow_back</span><span class="material-icons-outlined kanboard unboxed-button"
+					title="move right">arrow_forward</span></span>
+		</div>
+		
+		
+		<div class="kanboard tile"><span class="kanboard button text-button">ADD TILE</span></div>
+	</div>
+	<h2>Tiles</h2>
+	<div>
+		Tiles can be moved using the arrows buttons
+		<div class="kanboard tile">
+			<div class="kanboard buttons-line">
+				<span>
+					<span class="material-icons-outlined kanboard unboxed-button" title="move left">arrow_back</span>
+					<span title="move down" class="material-icons-outlined kanboard unboxed-button">arrow_downward</span>
+					<span class="material-icons-outlined kanboard unboxed-button" title="move right">arrow_forward</span>
+					<span title="move up" class="material-icons-outlined kanboard unboxed-button">arrow_upward</span>
+				</span>
+			</div>
+		</div>
+	</div>
+	<div>
+		Tiles can be edited or deleted using the right sided buttons
+		<div class="kanboard tile">
+			<div class="kanboard buttons-line">
+				<span>
+					<span title="edit" class="material-icons-outlined kanboard unboxed-button">edit</span>
+					<span title="delete" class="material-icons-outlined kanboard delete-button">delete</span>
+				</span>
+			</div>
+		</div>
+	</div>
+	<h3>Tile Types</h3>
+	<div>
+		Tile can be of two types, each identified by a different position in the color bar and a different for style the title.
+	</div>
+	<div class="kanboard tile" title="Informative">
+		<div class="kanboard tile-color tile-informative" style="background-color: rgb(198, 135, 232);"></div>
+		<div class="kanboard buttons-line">
+			<p class="kanboard tile-title tile-informative">Infomative tile</p>
+			<div><span title="edit" class="material-icons-outlined kanboard unboxed-button">edit</span><span
+					title="delete" class="material-icons-outlined kanboard delete-button">delete</span></div>
+		</div>
+		<div class="kanboard buttons-line">
+			<div>
+				<span class="material-icons-outlined kanboard unboxed-button"
+					title="move left">arrow_back</span>
+				<span title="move down" class="material-icons-outlined kanboard unboxed-button">arrow_downward</span>
+				<span class="material-icons-outlined kanboard unboxed-button" title="move right">arrow_forward</span>
+			</div>
+			<p class="kanboard tile-author">user</p>
+		</div>
+		<p class="kanboard tile-content-text">lorem ipsum</p>
+	</div>
+	<div class="kanboard tile" title="Organizational">
+		<div class="kanboard tile-color tile-organizational" style="background-color: rgb(0, 30, 199);"></div>
+		<div class="kanboard buttons-line">
+			<p class="kanboard tile-title tile-organizational">Organizational Tile</p>
+			<div>
+				<span title="edit" class="material-icons-outlined kanboard unboxed-button">edit</span>
+				<span title="delete" class="material-icons-outlined kanboard delete-button">delete</span>
+			</div>
+		</div>
+		<div class="kanboard buttons-line">
+			<div><span class="material-icons-outlined kanboard unboxed-button"
+					title="move left">arrow_back</span><span title="move up"
+					class="material-icons-outlined kanboard unboxed-button">arrow_upward</span><span
+					class="material-icons-outlined kanboard unboxed-button" title="move right">arrow_forward</span>
+			</div>
+			<p class="kanboard tile-author">user</p>
+		</div>
+		<p class="kanboard tile-content-text">lorem ipsum</p>
+	</div>
+</body>
+
+</html>
