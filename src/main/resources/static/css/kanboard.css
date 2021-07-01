@@ -254,6 +254,11 @@
 	background-color: var(--input-background);
 }
 
+.kanboard.text {
+	font-family: var(--font-family);
+	background-color: var(--board-background);
+}
+
 .kanboard.input::placeholder{
 	color: var(--light-primary);
 	opacity: 0.2;
