@@ -30,7 +30,7 @@ public class DsKanboardApplication {
 		String directory = "ds-kanboard";
 		
 		if (args.length > 0) {
-			rootDirectory = args[1];
+			rootDirectory = args[0];
 			new File(rootDirectory).mkdirs();
 		}
 		
