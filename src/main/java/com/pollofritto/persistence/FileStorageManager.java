@@ -14,7 +14,7 @@ public abstract class FileStorageManager {
 	/**
 	 * Stores a file to the returned path
 	 * @param file
-	 * @return path of the file
+	 * @return the URI of the given stored file
 	 */
 	public abstract String storeFile(MultipartFile file) throws IOException;
 	
@@ -33,8 +33,21 @@ public abstract class FileStorageManager {
 	 */
 	public abstract byte[] getFile(String uri) throws FileNotFoundException, IOException;
 
+	/**
+	 * Stores a new image to the returned path
+	 * @param file
+	 * @return the URI of the given stored image
+	 * @throws IOException
+	 */
 	public abstract String storeImage(MultipartFile file) throws IOException;
-	
+
+	/**
+	 * Stores a new image with the given name to the returned path
+	 * @param file
+	 * @param fileName
+	 * @return the URI of the given stored image
+	 * @throws IOException
+	 */
 	public abstract String storeImage(MultipartFile file, String fileName) throws IOException;
 	
 }
