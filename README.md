@@ -11,8 +11,22 @@ web-application.
 
 ![kanboard-screenshot](./images/screenshot.png)
 
-<!-- START doctoc -->
-<!-- END doctoc -->
+<!-- START doctoc generated TOC please keep comment here to allow auto update -->
+<!-- DON'T EDIT THIS SECTION, INSTEAD RE-RUN doctoc TO UPDATE -->
+**Table of Contents**
+
+- [Contributors](#contributors)
+- [Instructions](#instructions)
+  - [Load and start](#load-and-start)
+  - [Login](#login)
+  - [Multiple boards](#multiple-boards)
+  - [Persistence](#persistence)
+  - [Tile types](#tile-types)
+  - [Client caching](#client-caching)
+  - [Tile swap](#tile-swap)
+  - [Help page](#help-page)
+
+<!-- END doctoc generated TOC please keep comment here to allow auto update -->
 
 
 ## Contributors
