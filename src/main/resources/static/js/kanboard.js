@@ -86,7 +86,7 @@ class NavbarElement {
 		this.rootNode.classList.add("kanboard", "navbar");
 
 		var buttonsSpan = document.createElement("span");
-		buttonsSpan.style.display = "flex";
+		buttonsSpan.classList.add("kanboard", "buttons-line");
 
 		if (boards != undefined && boards.length > 0) {
 			var select = document.createElement("select");
@@ -134,8 +134,17 @@ class NavbarElement {
 		}
 		buttonsSpan.appendChild(newBoardButton);
 
+		var helpButton = document.createElement("a");
+		helpButton.setAttribute("href", "help.html");
+		helpButton.classList.add("kanboard", "unboxed-button", "material-icons-outlined");
+		helpButton.style.textDecoration = "none";
+		helpButton.append("help");
+
+		buttonsSpan.appendChild(helpButton);
+
 		this.rootNode.appendChild(buttonsSpan);
 
+		/*
 		var legend = document.createElement("span");
 		legend.classList.add("kanboard", "buttons-line");
 
@@ -166,6 +175,14 @@ class NavbarElement {
 		legend.appendChild(organizationalLegend);
 
 		this.rootNode.append(legend);
+		*/
+
+		var logo = document.createElement("img");
+		logo.setAttribute("src", "/img/logo.png");
+		logo.style.position = "relative";
+		logo.style.height = "60%";
+		logo.style.margin = "0.2rem";
+		this.rootNode.appendChild(logo);
 
 		var loginButton = document.createElement("span");
 		loginButton.classList.add("kanboard", "button", "text-button");
