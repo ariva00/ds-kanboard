@@ -24,6 +24,7 @@ web-application.
   - [Tile types](#tile-types)
   - [Client caching](#client-caching)
   - [Tile swap](#tile-swap)
+  - [API endpoints](#api-endpoints)
   - [Help page](#help-page)
 
 <!-- END doctoc generated TOC please keep comment here to allow auto update -->
